@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime state (intervention inbox is regenerated per run)
+runtime/
+
+# OS
+.DS_Store
+
+# Evidence is a deliverable and IS committed. Scratch runs are not:
+evidence/**/scratch/

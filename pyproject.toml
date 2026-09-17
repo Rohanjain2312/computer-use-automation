@@ -1,0 +1,31 @@
+[project]
+name = "cua"
+version = "0.1.0"
+description = "Computer-use automation: LLM discovery -> reusable capability artifact -> deterministic replay."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40",
+    "flask>=3.0",
+    "playwright>=1.47",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+]
+
+[project.scripts]
+cua = "cua.cli:app"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-timeout>=2.3"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cua"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["browser: requires a live Playwright browser and the mock app"]
+addopts = "-q"

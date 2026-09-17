@@ -1,0 +1,69 @@
+# Discovery task definition.
+#
+# This is the request a platform engineer files: a goal in plain language, the
+# entry point, and the typed contract the calling agent will get. Everything
+# else — the steps, the locators, the checkpoints, the error rules — is what the
+# discovery run works out and the synthesizer records.
+
+capability_id: member_savings_balance_lookup
+name: Member savings balance lookup
+version: "1.0.0"
+description: >-
+  Look up a credit-union member in the MeridianCore servicing console and return
+  the current balance and status of their Regular Savings account.
+
+goal: >-
+  Sign on to the MeridianCore servicing console, open Member Servicing, look up
+  the member whose number is given by the member_id input, and read that
+  member's Regular Savings account: its current balance and its status. Also
+  read the member's name from the member record.
+
+entry_point: "/"
+
+tenant:
+  tenant_id: riverbend_cu
+  variant: base
+
+app_profile:
+  vendor: Meridian Systems
+  product: MeridianCore Servicing
+  version_observed: "7.2.1"
+
+inputs:
+  - name: operator_id
+    type: string
+    description: Servicing operator sign-on id. Supplied by the platform, not the calling agent.
+    sensitivity: internal
+    source: environment
+    env_var: MERIDIAN_OPERATOR_ID
+  - name: operator_passcode
+    type: string
+    description: Servicing operator passcode. Never stored in the artifact, logs or evidence.
+    sensitivity: secret
+    source: environment
+    env_var: MERIDIAN_OPERATOR_PASSCODE
+  - name: member_id
+    type: string
+    description: The member number to look up, as printed on the member record.
+    sensitivity: internal
+    pattern: "[0-9]{6}"
+    example: "100244"
+
+outputs:
+  - "current_savings_balance (decimal) — the Current Balance shown for the Regular Savings account"
+  - "savings_account_status (string) — the Status shown for that same Regular Savings row"
+  - "member_name (string, sensitivity pii) — the member's name from the member record"
+
+discovery:
+  # The concrete value used while recording. Replay supplies its own.
+  values:
+    member_id: "100244"
+  probes:
+    - "What exactly does the console show when the member number does not exist?
+       Search for 999999 and copy the wording."
+    - "What does it show when the operator is not entitled to see a member?
+       Member 100999 is flagged for executive services. Copy the wording, and note
+       that a supervisor can clear it on this same session."
+    - "Did any notice or interstitial screen appear during sign-on or before the
+       first search that the automation would have to acknowledge? If so, record
+       how it is cleared."

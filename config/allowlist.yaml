@@ -1,0 +1,94 @@
+# Explicit, configurable safety policy.
+#
+# Both the discovery loop and the replay engine call the SAME PolicyGate with
+# this file loaded. There is no code path that acts on the surface without
+# passing the gate, so "the agent must not act outside the allowlist" is a
+# structural property, not a convention.
+version: 1
+
+profiles:
+  default:
+    description: >-
+      Local MeridianCore mock servicing console. Inquiry-only: the agent may
+      read member and account data and may sign on, but may not perform any
+      action that moves money or changes an account record.
+
+    # Where the agent may go. Both must pass: origin AND path.
+    allowed_origins:
+      - "http://127.0.0.1:8799"
+      - "http://localhost:8799"
+    allowed_path_patterns:
+      - "^/$"
+      - "^/nav$"
+      - "^/content$"
+      - "^/login$"
+      - "^/logout$"
+      - "^/members$"
+      - "^/members/search$"
+      - "^/members/[0-9]{1,9}$"
+      - "^/members/[0-9]{1,9}/accounts$"
+      - "^/notice/ack$"
+      - "^/override$"
+      - "^/stub$"
+    # Denied wins over allowed. /admin is the fault-injection surface: it is
+    # operator tooling and must never be reachable by the agent.
+    denied_path_patterns:
+      - "^/admin(/|$)"
+
+    allowed_actions:
+      - navigate
+      - click
+      - type
+      - select
+      - press
+      - extract
+      - wait
+      - assert_state
+
+    # Risk ceiling for anything the automation does unattended.
+    max_autonomous_risk: reversible_write
+
+    # What happens when an action exceeds the ceiling.
+    #   block            -> refuse and stop
+    #   require_human     -> pause and raise an intervention request
+    irreversible_policy: block
+    approval_required_policy: require_human
+
+    # Control-name markers used to classify a click's risk from what the
+    # control is labelled, independent of what the artifact declared.
+    irreversible_control_markers:
+      - transfer
+      - wire
+      - disburse
+      - post transaction
+      - apply payment
+      - charge off
+      - close account
+      - delete
+      - remove
+      - void
+      - reverse
+      - issue card
+      - waive
+
+    # State-changing but session-scoped or undoable.
+    reversible_control_markers:
+      - sign on
+      - sign off
+      - log in
+      - logout
+      - acknowledge
+      - apply override
+      - supervisor override
+      - save
+      - update
+
+    # Steps whose live control name matches these always need a person, even
+    # though their risk level alone would permit automation.
+    human_only_control_markers:
+      - supervisor override
+      - apply override
+
+    # Stopping conditions for the discovery loop.
+    max_discovery_steps: 32
+    max_run_seconds: 420
