@@ -171,7 +171,11 @@
          names: at least two of them, all distinct, none a bare value. */
       var distinct = hs.filter(function (h, k) { return hs.indexOf(h) === k; }).length === hs.length;
       var valueLike = hs.some(function (h) { return /^[$]?[\d.,%-]+$/.test(h); });
-      var confident = anyTh || (hs.length > 1 && distinct && !valueLike);
+      /* ...and only when it is the table's FIRST row. A "header" found further
+         down is a data row that happens to look tidy — a two-column form panel
+         whose second row reads "Inquiry Type | Account Summary" would otherwise
+         be treated as a column table. */
+      var confident = anyTh || (i === 0 && hs.length > 1 && distinct && !valueLike);
       return { headers: hs, rowIndex: i, confident: confident };
     }
     return null;

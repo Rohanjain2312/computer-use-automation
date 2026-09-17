@@ -1,0 +1,339 @@
+{
+  "url": "http://127.0.0.1:8799/",
+  "title": "MeridianCore Servicing Console",
+  "captured_at": "2026-09-17T22:28:03.258Z",
+  "frames": [
+    {
+      "name": "navpane",
+      "path": "navpane",
+      "src": "/nav",
+      "url": "http://127.0.0.1:8799/nav",
+      "accessible": true,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 900
+      }
+    },
+    {
+      "name": "bodypane",
+      "path": "bodypane",
+      "src": "/content",
+      "url": "http://127.0.0.1:8799/members/100999",
+      "accessible": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 900
+      }
+    }
+  ],
+  "text": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Inquiry\nAccess Restricted\nYou do not have permission to view this member.\n\nMember 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+  "nodes": [
+    {
+      "ref": "n0",
+      "role": "button",
+      "name": "Dashboard",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Dashboard",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 48,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Servicing v7.2.1"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n1",
+      "role": "button",
+      "name": "Member Servicing",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 75,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Dashboard"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n2",
+      "role": "button",
+      "name": "Card Services",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Card Services",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 102,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Member Servicing"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n3",
+      "role": "button",
+      "name": "Batch Posting",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Batch Posting",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 129,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Card Services"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n4",
+      "role": "button",
+      "name": "Sign Off",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Sign Off",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 156,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Batch Posting"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n5",
+      "role": "cell",
+      "name": "Member Servicing \u2014 Inquiry",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing \u2014 Inquiry",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 27
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Member Servicing \u2014 Inquiry",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n6",
+      "role": "cell",
+      "name": "Access Restricted",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Access Restricted",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 474.5,
+        "y": 68,
+        "width": 518,
+        "height": 28
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Access Restricted",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n7",
+      "role": "cell",
+      "name": "You do not have permission to view this member. Member 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "You do not have permission to view this member. Member 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 474.5,
+        "y": 96,
+        "width": 518,
+        "height": 100
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Access Restricted"
+      ],
+      "label_left": "",
+      "label_above": "Access Restricted",
+      "table": {
+        "headers": [],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "You do not have permission to view this member. Member 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n8",
+      "role": "button",
+      "name": "Supervisor Override",
+      "name_source": "value-attr",
+      "value": "Supervisor Override",
+      "text": "",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 863.2,
+        "y": 204,
+        "width": 120.3,
+        "height": 20
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "You do not have permission to view this member. Member 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue."
+      ],
+      "label_left": "",
+      "label_above": "You do not have permission to view this member. Member 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+      "table": {
+        "headers": [],
+        "row_index": 2,
+        "col_index": 0,
+        "row_label": "",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "input",
+        "css": "input",
+        "name_attr": "",
+        "id": ""
+      }
+    }
+  ]
+}

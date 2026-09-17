@@ -118,6 +118,11 @@ def render_observation(obs: Observation, *, step: int, max_controls: int = 60,
             state = "" if n.enabled else " [disabled]"
             lines.append(f"  {n.ref} | {n.role} | {n.name}{frame}{state} | {value}")
 
+    fields = _render_fields(obs, max_cells)
+    if fields:
+        lines.append("")
+        lines.extend(fields)
+
     tables = _render_tables(obs, max_cells)
     if tables:
         lines.append("")
@@ -130,6 +135,38 @@ def render_observation(obs: Observation, *, step: int, max_controls: int = 60,
     lines.append("VISIBLE TEXT")
     lines.append(text)
     return "\n".join(lines)
+
+
+def _render_fields(obs: Observation, budget: int) -> list[str]:
+    """Key/value panels.
+
+    Legacy record screens put their data in label-then-value cell pairs rather
+    than in column tables. Those cells are not interactive, so they never appear
+    under CONTROLS — but they are exactly what a capability reads, so the agent
+    needs a ref for each one in order to declare it as an output.
+    """
+    # A key/value panel alternates label, value, label, value across the row, so
+    # the data cells are the odd-indexed ones. Without this the rendering also
+    # emits every key cell paired with the previous row's value, which reads as
+    # "100244 = Member Status" and is exactly the kind of noise that sends the
+    # agent looking for a field that does not exist.
+    out: list[str] = []
+    for node in obs.nodes:
+        if node.role != "cell" or not node.label_left or not node.text:
+            continue
+        if node.table and node.table.col_index % 2 == 0:
+            continue
+        if node.table and node.table.header_confident:
+            continue  # a real column table; rendered under TABLE instead
+        if node.text == node.label_left or len(node.text) > 120:
+            continue
+        frame = f" @{node.frame_name}" if node.frame_name else ""
+        out.append(f"  {node.ref} | {node.label_left}{frame} | {node.text!r}")
+        if len(out) >= budget:
+            break
+    if out:
+        out.insert(0, "LABELLED VALUES  (ref | label | value)  — record fields, not controls")
+    return out
 
 
 def _render_tables(obs: Observation, budget: int) -> list[str]:

@@ -1,0 +1,1381 @@
+{
+  "url": "http://127.0.0.1:8799/",
+  "title": "MeridianCore Servicing Console",
+  "captured_at": "2026-09-17T22:29:40.946Z",
+  "frames": [
+    {
+      "name": "navpane",
+      "path": "navpane",
+      "src": "/nav",
+      "url": "http://127.0.0.1:8799/nav",
+      "accessible": true,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 900
+      }
+    },
+    {
+      "name": "bodypane",
+      "path": "bodypane",
+      "src": "/content",
+      "url": "http://127.0.0.1:8799/members/100999",
+      "accessible": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 900
+      }
+    },
+    {
+      "name": "acctframe",
+      "path": "bodypane/acctframe",
+      "src": "/members/100999/accounts",
+      "url": "http://127.0.0.1:8799/members/100999/accounts",
+      "accessible": true,
+      "rect": {
+        "x": 199,
+        "y": 186,
+        "width": 664,
+        "height": 234
+      }
+    }
+  ],
+  "text": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Account Summary\nMember Record\nMember Number 100999 Member Status ACTIVE\nMember Name [REDACTED]:output:member_name Member Since 2008-01-22\nBranch Executive Services 001\nAccount Detail\n---\nType Account Current Balance Status Opened\nRegular Savings ****3355 $27,640.18 OPEN 2008-01-22\nMoney Market ****8802 $102,904.66 OPEN 2012-05-30\nBalances are as of the last posted business day.",
+  "nodes": [
+    {
+      "ref": "n0",
+      "role": "button",
+      "name": "Dashboard",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Dashboard",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 48,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Servicing v7.2.1"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n1",
+      "role": "button",
+      "name": "Member Servicing",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 75,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Dashboard"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n2",
+      "role": "button",
+      "name": "Card Services",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Card Services",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 102,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Member Servicing"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n3",
+      "role": "button",
+      "name": "Batch Posting",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Batch Posting",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 129,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Card Services"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n4",
+      "role": "button",
+      "name": "Sign Off",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Sign Off",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 156,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Batch Posting"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n5",
+      "role": "cell",
+      "name": "Member Servicing \u2014 Account Summary",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing \u2014 Account Summary",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 27
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Member Servicing \u2014 Account Summary",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n6",
+      "role": "cell",
+      "name": "Member Record",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Record",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 39.5,
+        "width": 639,
+        "height": 30
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Member Record",
+        "col_header": "Member Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n7",
+      "role": "cell",
+      "name": "Member Number",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Number",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 69.5,
+        "width": 143,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Record"
+      ],
+      "label_left": "",
+      "label_above": "Member Record",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "Member Number",
+        "col_header": "Member Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n8",
+      "role": "cell",
+      "name": "100999",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "100999",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 342.5,
+        "y": 69.5,
+        "width": 193,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Number"
+      ],
+      "label_left": "Member Number",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 1,
+        "col_index": 1,
+        "row_label": "Member Number",
+        "col_header": "100999",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n9",
+      "role": "cell",
+      "name": "Member Status",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Status",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 535.5,
+        "y": 69.5,
+        "width": 133,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "100999"
+      ],
+      "label_left": "100999",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 1,
+        "col_index": 2,
+        "row_label": "Member Number",
+        "col_header": "Member Status",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n10",
+      "role": "cell",
+      "name": "ACTIVE",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "ACTIVE",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 668.5,
+        "y": 69.5,
+        "width": 170,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Status"
+      ],
+      "label_left": "Member Status",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 1,
+        "col_index": 3,
+        "row_label": "Member Number",
+        "col_header": "ACTIVE",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n11",
+      "role": "cell",
+      "name": "Member Name",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Name",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 95.5,
+        "width": 143,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Number"
+      ],
+      "label_left": "",
+      "label_above": "Member Number",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 2,
+        "col_index": 0,
+        "row_label": "Member Name",
+        "col_header": "Member Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n12",
+      "role": "cell",
+      "name": "[REDACTED]:output:member_name",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "[REDACTED]:output:member_name",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 342.5,
+        "y": 95.5,
+        "width": 193,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Name",
+        "100999"
+      ],
+      "label_left": "Member Name",
+      "label_above": "100999",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 2,
+        "col_index": 1,
+        "row_label": "Member Name",
+        "col_header": "100999",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n13",
+      "role": "cell",
+      "name": "Member Since",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Since",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 535.5,
+        "y": 95.5,
+        "width": 133,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "[REDACTED]:output:member_name",
+        "Member Status"
+      ],
+      "label_left": "[REDACTED]:output:member_name",
+      "label_above": "Member Status",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 2,
+        "col_index": 2,
+        "row_label": "Member Name",
+        "col_header": "Member Status",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n14",
+      "role": "cell",
+      "name": "2008-01-22",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "2008-01-22",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 668.5,
+        "y": 95.5,
+        "width": 170,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Since",
+        "ACTIVE"
+      ],
+      "label_left": "Member Since",
+      "label_above": "ACTIVE",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 2,
+        "col_index": 3,
+        "row_label": "Member Name",
+        "col_header": "ACTIVE",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n15",
+      "role": "cell",
+      "name": "Branch",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Branch",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 121.5,
+        "width": 143,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Name"
+      ],
+      "label_left": "",
+      "label_above": "Member Name",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 3,
+        "col_index": 0,
+        "row_label": "Branch",
+        "col_header": "Member Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n16",
+      "role": "cell",
+      "name": "Executive Services 001",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Executive Services 001",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 342.5,
+        "y": 121.5,
+        "width": 496,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Branch",
+        "[REDACTED]:output:member_name"
+      ],
+      "label_left": "Branch",
+      "label_above": "[REDACTED]:output:member_name",
+      "table": {
+        "headers": [
+          "Member Number",
+          "100999",
+          "Member Status",
+          "ACTIVE"
+        ],
+        "row_index": 3,
+        "col_index": 1,
+        "row_label": "Branch",
+        "col_header": "100999",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n17",
+      "role": "cell",
+      "name": "Type",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Type",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 186,
+        "width": 147.9,
+        "height": 27.5
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Type",
+        "col_header": "Type",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n18",
+      "role": "cell",
+      "name": "Account",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Account",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 347.4,
+        "y": 186,
+        "width": 108.9,
+        "height": 27.5
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Type"
+      ],
+      "label_left": "Type",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 0,
+        "col_index": 1,
+        "row_label": "Type",
+        "col_header": "Account",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n19",
+      "role": "cell",
+      "name": "Current Balance",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Current Balance",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 456.3,
+        "y": 186,
+        "width": 199.9,
+        "height": 27.5
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Account"
+      ],
+      "label_left": "Account",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 0,
+        "col_index": 2,
+        "row_label": "Type",
+        "col_header": "Current Balance",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n20",
+      "role": "cell",
+      "name": "Status",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Status",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 656.2,
+        "y": 186,
+        "width": 90,
+        "height": 27.5
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Current Balance"
+      ],
+      "label_left": "Current Balance",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 0,
+        "col_index": 3,
+        "row_label": "Type",
+        "col_header": "Status",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n21",
+      "role": "cell",
+      "name": "Opened",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Opened",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 746.2,
+        "y": 186,
+        "width": 112.3,
+        "height": 27.5
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Status"
+      ],
+      "label_left": "Status",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 0,
+        "col_index": 4,
+        "row_label": "Type",
+        "col_header": "Opened",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n22",
+      "role": "cell",
+      "name": "Regular Savings",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Regular Savings",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 213.5,
+        "width": 147.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Type"
+      ],
+      "label_left": "",
+      "label_above": "Type",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "Regular Savings",
+        "col_header": "Type",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n23",
+      "role": "cell",
+      "name": "****3355",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "****3355",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 347.4,
+        "y": 213.5,
+        "width": 108.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Regular Savings",
+        "Account"
+      ],
+      "label_left": "Regular Savings",
+      "label_above": "Account",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 1,
+        "col_index": 1,
+        "row_label": "Regular Savings",
+        "col_header": "Account",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n24",
+      "role": "cell",
+      "name": "$27,640.18",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "$27,640.18",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 456.3,
+        "y": 213.5,
+        "width": 199.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "****3355",
+        "Current Balance"
+      ],
+      "label_left": "****3355",
+      "label_above": "Current Balance",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 1,
+        "col_index": 2,
+        "row_label": "Regular Savings",
+        "col_header": "Current Balance",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n25",
+      "role": "cell",
+      "name": "OPEN",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "OPEN",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 656.2,
+        "y": 213.5,
+        "width": 90,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "$27,640.18",
+        "Status"
+      ],
+      "label_left": "$27,640.18",
+      "label_above": "Status",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 1,
+        "col_index": 3,
+        "row_label": "Regular Savings",
+        "col_header": "Status",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n26",
+      "role": "cell",
+      "name": "2008-01-22",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "2008-01-22",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 746.2,
+        "y": 213.5,
+        "width": 112.3,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "OPEN",
+        "Opened"
+      ],
+      "label_left": "OPEN",
+      "label_above": "Opened",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 1,
+        "col_index": 4,
+        "row_label": "Regular Savings",
+        "col_header": "Opened",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n27",
+      "role": "cell",
+      "name": "Money Market",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Money Market",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 199.5,
+        "y": 236.5,
+        "width": 147.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Regular Savings"
+      ],
+      "label_left": "",
+      "label_above": "Regular Savings",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 2,
+        "col_index": 0,
+        "row_label": "Money Market",
+        "col_header": "Type",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n28",
+      "role": "cell",
+      "name": "****8802",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "****8802",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 347.4,
+        "y": 236.5,
+        "width": 108.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "Money Market",
+        "****3355"
+      ],
+      "label_left": "Money Market",
+      "label_above": "****3355",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 2,
+        "col_index": 1,
+        "row_label": "Money Market",
+        "col_header": "Account",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n29",
+      "role": "cell",
+      "name": "$102,904.66",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "$102,904.66",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 456.3,
+        "y": 236.5,
+        "width": 199.9,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "****8802",
+        "$27,640.18"
+      ],
+      "label_left": "****8802",
+      "label_above": "$27,640.18",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 2,
+        "col_index": 2,
+        "row_label": "Money Market",
+        "col_header": "Current Balance",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n30",
+      "role": "cell",
+      "name": "OPEN",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "OPEN",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 656.2,
+        "y": 236.5,
+        "width": 90,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "$102,904.66",
+        "OPEN"
+      ],
+      "label_left": "$102,904.66",
+      "label_above": "OPEN",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 2,
+        "col_index": 3,
+        "row_label": "Money Market",
+        "col_header": "Status",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n31",
+      "role": "cell",
+      "name": "2012-05-30",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "2012-05-30",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 746.2,
+        "y": 236.5,
+        "width": 112.3,
+        "height": 23
+      },
+      "frame_path": "bodypane/acctframe",
+      "frame_name": "acctframe",
+      "label_candidates": [
+        "OPEN",
+        "2008-01-22"
+      ],
+      "label_left": "OPEN",
+      "label_above": "2008-01-22",
+      "table": {
+        "headers": [
+          "Type",
+          "Account",
+          "Current Balance",
+          "Status",
+          "Opened"
+        ],
+        "row_index": 2,
+        "col_index": 4,
+        "row_label": "Money Market",
+        "col_header": "Opened",
+        "header_confident": true
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    }
+  ]
+}

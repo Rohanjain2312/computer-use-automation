@@ -1,0 +1,1045 @@
+{
+  "schema_version": "1.0",
+  "capability_id": "member_savings_balance_lookup",
+  "version": "1.0.0",
+  "name": "Member savings balance lookup",
+  "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.",
+  "status": "approved",
+  "surface": {
+    "kind": "web",
+    "entry_point": "{{ config.base_url }}/",
+    "app_profile": {
+      "vendor": "Meridian Systems",
+      "product": "MeridianCore Servicing",
+      "version_observed": "7.2.1"
+    },
+    "tenant": {
+      "tenant_id": "riverbend_cu",
+      "variant": "base",
+      "base_url_config_key": "base_url"
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "required_strategies": [
+      "dom_hint",
+      "label_proximity",
+      "role_name",
+      "table_cell",
+      "text_anchor",
+      "viewport_ratio"
+    ]
+  },
+  "safety": {
+    "allowlist_profile": "default",
+    "max_autonomous_risk": "reversible_write",
+    "steps_requiring_approval": []
+  },
+  "inputs": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "required": true,
+      "description": "Servicing operator sign-on id. Supplied by the platform, not the calling agent.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": null,
+      "example": null,
+      "source": "environment",
+      "env_var": "MERIDIAN_OPERATOR_ID"
+    },
+    {
+      "name": "operator_passcode",
+      "type": "string",
+      "required": true,
+      "description": "Servicing operator passcode. Never stored in the artifact, logs or evidence.",
+      "sensitivity": "secret",
+      "enum_values": null,
+      "pattern": null,
+      "example": null,
+      "source": "environment",
+      "env_var": "MERIDIAN_OPERATOR_PASSCODE"
+    },
+    {
+      "name": "member_id",
+      "type": "string",
+      "required": true,
+      "description": "The member number to look up, as printed on the member record.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": "[0-9]{6}",
+      "example": "100244",
+      "source": "caller",
+      "env_var": null
+    }
+  ],
+  "outputs": [
+    {
+      "name": "current_savings_balance",
+      "type": "decimal",
+      "description": "Current Balance shown for the Regular Savings account",
+      "sensitivity": "internal",
+      "required": true,
+      "extract": {
+        "target": {
+          "description": "the 'Current Balance' cell of the 'Regular Savings' row",
+          "strategies": [
+            {
+              "kind": "table_cell",
+              "params": {
+                "headers": [
+                  "Type",
+                  "Account",
+                  "Current Balance",
+                  "Status",
+                  "Opened"
+                ],
+                "row_label": "Regular Savings",
+                "column": "Current Balance",
+                "row_match": "ci_exact"
+              },
+              "confidence": 0.96,
+              "rationale": "Addresses the cell by table semantics \u2014 the 'Current Balance' column of the 'Regular Savings' row, in the table whose columns are ['Type', 'Account', 'Current Balance', 'Status', 'Opened'] \u2014 so inserted rows, reordered rows and restyled markup do not move the target (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "table_cell",
+              "params": {
+                "row_label": "Regular Savings",
+                "column": "Current Balance",
+                "row_match": "ci_exact"
+              },
+              "confidence": 0.88,
+              "rationale": "Same row/column addressing but without requiring the exact column set, so a tenant variant that adds or renames a neighbouring column still resolves (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "viewport_ratio",
+              "params": {
+                "role": "cell",
+                "x_ratio": 0.45,
+                "y_ratio": 0.2756,
+                "tolerance": 0.04,
+                "viewport_width": 1280,
+                "viewport_height": 900
+              },
+              "confidence": 0.25,
+              "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "dom_hint",
+              "params": {
+                "css": "td"
+              },
+              "confidence": 0.175,
+              "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 19 other control(s) on this screen)."
+            }
+          ],
+          "frame": "acctframe",
+          "require_unique": true
+        },
+        "attribute": "text",
+        "transforms": [
+          "strip",
+          "money_to_decimal"
+        ]
+      }
+    },
+    {
+      "name": "savings_account_status",
+      "type": "string",
+      "description": "Status shown for the Regular Savings account row",
+      "sensitivity": "internal",
+      "required": true,
+      "extract": {
+        "target": {
+          "description": "the 'Status' cell of the 'Regular Savings' row",
+          "strategies": [
+            {
+              "kind": "table_cell",
+              "params": {
+                "headers": [
+                  "Type",
+                  "Account",
+                  "Current Balance",
+                  "Status",
+                  "Opened"
+                ],
+                "row_label": "Regular Savings",
+                "column": "Status",
+                "row_match": "ci_exact"
+              },
+              "confidence": 0.96,
+              "rationale": "Addresses the cell by table semantics \u2014 the 'Status' column of the 'Regular Savings' row, in the table whose columns are ['Type', 'Account', 'Current Balance', 'Status', 'Opened'] \u2014 so inserted rows, reordered rows and restyled markup do not move the target (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "table_cell",
+              "params": {
+                "row_label": "Regular Savings",
+                "column": "Status",
+                "row_match": "ci_exact"
+              },
+              "confidence": 0.88,
+              "rationale": "Same row/column addressing but without requiring the exact column set, so a tenant variant that adds or renames a neighbouring column still resolves (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "viewport_ratio",
+              "params": {
+                "role": "cell",
+                "x_ratio": 0.5559,
+                "y_ratio": 0.2756,
+                "tolerance": 0.04,
+                "viewport_width": 1280,
+                "viewport_height": 900
+              },
+              "confidence": 0.25,
+              "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "dom_hint",
+              "params": {
+                "css": "td"
+              },
+              "confidence": 0.175,
+              "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 19 other control(s) on this screen)."
+            }
+          ],
+          "frame": "acctframe",
+          "require_unique": true
+        },
+        "attribute": "text",
+        "transforms": [
+          "strip",
+          "collapse_ws"
+        ]
+      }
+    },
+    {
+      "name": "member_name",
+      "type": "string",
+      "description": "Member's name from the member record",
+      "sensitivity": "pii",
+      "required": true,
+      "extract": {
+        "target": {
+          "description": "the value cell beside the 'Member Name' label",
+          "strategies": [
+            {
+              "kind": "label_proximity",
+              "params": {
+                "role": "cell",
+                "label": "Member Name",
+                "match": "ci_exact"
+              },
+              "confidence": 0.93,
+              "rationale": "The visible text 'Member Name' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "viewport_ratio",
+              "params": {
+                "role": "cell",
+                "x_ratio": 0.343,
+                "y_ratio": 0.1206,
+                "tolerance": 0.04,
+                "viewport_width": 1280,
+                "viewport_height": 900
+              },
+              "confidence": 0.25,
+              "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "dom_hint",
+              "params": {
+                "css": "td"
+              },
+              "confidence": 0.175,
+              "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 11 other control(s) on this screen)."
+            }
+          ],
+          "frame": "bodypane",
+          "require_unique": true
+        },
+        "attribute": "text",
+        "transforms": [
+          "strip",
+          "collapse_ws"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "s00_open",
+      "intent": "Open the servicing console entry point",
+      "action": "navigate",
+      "target": null,
+      "value": null,
+      "url": "{{ config.base_url }}/",
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "element_present",
+          "params": {
+            "strategy": "role_name",
+            "params": {
+              "role": "textbox",
+              "name": "Operator ID"
+            }
+          },
+          "children": [],
+          "description": "the 'Operator ID' control is on screen, so the entry screen finished loading"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "element_present",
+        "params": {
+          "strategy": "role_name",
+          "params": {
+            "role": "textbox",
+            "name": "Operator ID"
+          }
+        },
+        "children": [],
+        "description": "the 'Operator ID' control is on screen, so the entry screen finished loading"
+      },
+      "tags": [
+        "entry"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s01_enter_operator_id_sign",
+      "intent": "Enter the operator ID to sign on",
+      "action": "type",
+      "target": {
+        "description": "the 'Operator ID' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Operator ID",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Operator ID' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Operator ID",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Operator ID'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "opid",
+              "css": "input[name=\"opid\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'opid'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.5988,
+              "y_ratio": 0.12,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "operator_id",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s02_enter_operator_passcode_sign",
+      "intent": "Enter the operator passcode to sign on",
+      "action": "type",
+      "target": {
+        "description": "the 'Passcode' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Passcode",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Passcode' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Passcode",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Passcode'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "opsecret",
+              "css": "input[name=\"opsecret\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'opsecret'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.5988,
+              "y_ratio": 0.15,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "operator_passcode",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s03_sign_servicing_console",
+      "intent": "Sign on to the servicing console",
+      "action": "click",
+      "target": {
+        "description": "the 'Sign On' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Sign On",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Sign On' via value-attr; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Sign On",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Sign On'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "input"
+            },
+            "confidence": 0.5,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.7107,
+              "y_ratio": 0.18,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "reversible_write",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Select a function from the navigation pane."
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "You do not have permission to view this member."
+              },
+              "children": [],
+              "description": "the screen shows 'You do not have permission to view this member.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001"
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001'"
+            }
+          ],
+          "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Select a function from the navigation pane."
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before"
+      },
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s04_open_member_servicing_look_up_memb",
+      "intent": "Open Member Servicing to look up the member",
+      "action": "click",
+      "target": {
+        "description": "the 'Member Servicing' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Member Servicing",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Member Servicing' via inner-text; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "button",
+              "label": "Dashboard",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Dashboard' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Member Servicing",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Member Servicing'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.0727,
+              "y_ratio": 0.0983,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "div"
+            },
+            "confidence": 0.175,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 4 other control(s) on this screen)."
+          }
+        ],
+        "frame": "navpane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Member Servicing \u2014 Inquiry"
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "You do not have permission to view this member."
+              },
+              "children": [],
+              "description": "the screen shows 'You do not have permission to view this member.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001"
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001'"
+            }
+          ],
+          "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Member Servicing \u2014 Inquiry"
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before"
+      },
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s05_enter_member_number_look_up",
+      "intent": "Enter the member number to look up",
+      "action": "type",
+      "target": {
+        "description": "the 'Member Number' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Member Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Member Number' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Member Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Member Number'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "mbrid",
+              "css": "input[name=\"mbrid\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'mbrid'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.3391,
+              "y_ratio": 0.0978,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "member_id",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s06_search_member_s_account_summary",
+      "intent": "Search for the member's account summary",
+      "action": "click",
+      "target": {
+        "description": "the 'Search' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Search",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Search' via value-attr; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Search",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Search'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "input"
+            },
+            "confidence": 0.3,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 1 other control(s) on this screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.4986,
+              "y_ratio": 0.1578,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Balances are as of the last posted business day."
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "You do not have permission to view this member."
+              },
+              "children": [],
+              "description": "the screen shows 'You do not have permission to view this member.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001"
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001'"
+            }
+          ],
+          "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Balances are as of the last posted business day."
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before"
+      },
+      "tags": [],
+      "optional": false
+    }
+  ],
+  "business_outcomes": [
+    {
+      "name": "member_not_found",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "No member matching that number was found."
+        },
+        "children": [],
+        "description": "the screen shows 'No member matching that number was found.'"
+      },
+      "disposition": "return_to_caller",
+      "message": "The searched member number does not exist in the system. The console displays 'No member matching that number was found.' along with the searched member number.",
+      "remediation": null,
+      "active_from_step": null
+    },
+    {
+      "name": "member_access_restricted",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "You do not have permission to view this member."
+        },
+        "children": [],
+        "description": "the screen shows 'You do not have permission to view this member.'"
+      },
+      "disposition": "escalate_to_human",
+      "message": "Member the requested record is flagged EXECUTIVE SERVICES. A supervisor override is required to continue. The console shows an 'Access Restricted' panel with a 'Supervisor Override' button that a supervisor can use on this same session to clear the restriction and let the run continue.",
+      "remediation": "A supervisor should click the 'Supervisor Override' button on this same session to clear the executive services flag and continue the lookup.",
+      "active_from_step": null
+    }
+  ],
+  "recovery_rules": [
+    {
+      "name": "system_maintenance_notice",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "Scheduled maintenance window 02:00\u201303:00 CT. Batch posting may be delayed. This notice is shown once per sign-on."
+        },
+        "children": [],
+        "description": "the screen shows 'Scheduled maintenance window 02:00\u201303:00 CT. Batch posting m'"
+      },
+      "actions": [
+        {
+          "action": "click",
+          "target": {
+            "description": "the 'Acknowledge and Continue' control that clears this screen",
+            "strategies": [
+              {
+                "kind": "role_name",
+                "params": {
+                  "role": "button",
+                  "name": "Acknowledge and Continue"
+                },
+                "confidence": 0.9,
+                "rationale": "the control is identified by its visible label, which is what the operator clicks to clear the screen"
+              },
+              {
+                "kind": "text_anchor",
+                "params": {
+                  "text": "Acknowledge and Continue",
+                  "match": "contains"
+                },
+                "confidence": 0.6,
+                "rationale": "visible-text fallback if the role is reported differently"
+              }
+            ],
+            "frame": null,
+            "require_unique": false
+          },
+          "value": null,
+          "url": null,
+          "tag": null,
+          "wait": {
+            "until": null,
+            "settle_ms": 250,
+            "timeout_ms": 10000,
+            "poll_ms": 250
+          }
+        }
+      ],
+      "then": "retry_step",
+      "resume_from_step": null,
+      "max_attempts": 2,
+      "description": "A one-time System Notice interstitial appears the first time Member Servicing is opened after sign-on, warning about a scheduled maintenance window. It is cleared by clicking the 'Acknowledge and Continue' button, after which the Member Servicing lookup screen appears normally. It does not reappear later in the same session."
+    }
+  ],
+  "failure_rules": [
+    {
+      "name": "host_transaction_error",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "SYSTEM ERROR MC-5001"
+        },
+        "children": [],
+        "description": "the screen shows 'SYSTEM ERROR MC-5001'"
+      },
+      "error_class": "host_system_fault",
+      "message": "The console displayed 'Application Error' with 'SYSTEM ERROR MC-5001' and the text 'The host transaction could not be completed. Contact the service desk with this reference.' This is a genuine application/host fault and the run must stop rather than treat it as a business answer."
+    }
+  ],
+  "success_condition": {
+    "kind": "all_of",
+    "params": {},
+    "children": [
+      {
+        "kind": "table_cell_matches",
+        "params": {
+          "row_label": "Regular Savings",
+          "column": "Current Balance",
+          "frame": "acctframe"
+        },
+        "children": [],
+        "description": "the source cell for output 'current_savings_balance' is present and non-empty"
+      },
+      {
+        "kind": "table_cell_matches",
+        "params": {
+          "row_label": "Regular Savings",
+          "column": "Status",
+          "frame": "acctframe"
+        },
+        "children": [],
+        "description": "the source cell for output 'savings_account_status' is present and non-empty"
+      },
+      {
+        "kind": "element_present",
+        "params": {
+          "strategy": "label_proximity",
+          "params": {
+            "role": "cell",
+            "label": "Member Name",
+            "match": "ci_exact"
+          },
+          "frame": "bodypane"
+        },
+        "children": [],
+        "description": "the source control for output 'member_name' is present"
+      },
+      {
+        "kind": "text_present",
+        "params": {
+          "text": "Balances are as of the last posted business day."
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before"
+      }
+    ],
+    "description": "every declared output is readable on the final screen and the last recorded step's checkpoint still holds"
+  },
+  "provenance": {
+    "discovery_run_id": "disc_20260917T222707Z_a2c2c4",
+    "model": "claude-sonnet-5",
+    "model_calls": 22,
+    "created_at": "2026-09-17T22:28:37Z",
+    "created_by": "cua-discovery",
+    "goal": "Sign on to the MeridianCore servicing console, open Member Servicing, look up the member whose number is given by the member_id input, and read that member's Regular Savings account: its current balance and its status. Also read the member's name from the member record.",
+    "transcript_sha256": "sha256:ab156d39d28b36c769cb3451aa42a47bb88a6ff0f82f90b9fbe872a7a4359a17",
+    "transcript_evidence_path": "evidence/discovery/disc_20260917T222707Z_a2c2c4/model_trace.jsonl",
+    "notes": "dropped the step that dismissed the interstitial ('Dismiss the system notice to proceed to Member Servicing'); it is covered by a recovery rule, which fires whenever the screen appears"
+  },
+  "verification": {
+    "smoke_replay_run_id": "replay_verify_20260917T222854Z_211f22",
+    "smoke_replay_status": "success",
+    "verified_at": "2026-09-17T22:29:02Z"
+  },
+  "checksum": "sha256:0fe2dd5ae0035f369cd90882ce076ff6f2180679253a3e3e6a9546c1145c9d6a"
+}

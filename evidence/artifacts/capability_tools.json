@@ -1,0 +1,94 @@
+{
+  "tools": [
+    {
+      "name": "member_savings_balance_lookup",
+      "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.\n\nReturns on success: current_savings_balance (decimal), savings_account_status (string), member_name (string).\nMay instead return status='business_outcome' with one of: member_not_found, member_access_restricted.\nSurface: Meridian Systems MeridianCore Servicing. Artifact status: approved, version 1.0.0.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "description": "The member number to look up, as printed on the member record.",
+            "pattern": "[0-9]{6}",
+            "examples": [
+              "100244"
+            ]
+          }
+        },
+        "required": [
+          "member_id"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "results": {
+    "member_savings_balance_lookup": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "business_outcome",
+            "invalid_input",
+            "blocked_by_policy",
+            "failure"
+          ]
+        },
+        "outputs": {
+          "type": "object",
+          "properties": {
+            "current_savings_balance": {
+              "type": "string",
+              "description": "Current Balance shown for the Regular Savings account"
+            },
+            "savings_account_status": {
+              "type": "string",
+              "description": "Status shown for the Regular Savings account row"
+            },
+            "member_name": {
+              "type": "string",
+              "description": "Member's name from the member record"
+            }
+          }
+        },
+        "outcome": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "enum": [
+                "member_not_found",
+                "member_access_restricted"
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "failure": {
+          "type": "object",
+          "properties": {
+            "error_class": {
+              "type": "string"
+            },
+            "step_id": {
+              "type": "string"
+            },
+            "expected": {
+              "type": "string"
+            },
+            "observed": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "status"
+      ]
+    }
+  }
+}

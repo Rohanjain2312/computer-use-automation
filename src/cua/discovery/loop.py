@@ -95,6 +95,7 @@ class DiscoveryResult:
     failures: list[dict[str, Any]] = field(default_factory=list)
     escalations: list[dict[str, Any]] = field(default_factory=list)
     entry_point: str = ""
+    input_values: dict[str, str] = field(default_factory=dict)
     model: str = ""
     model_calls: int = 0
     usage: dict[str, int] = field(default_factory=dict)
@@ -119,6 +120,7 @@ class DiscoveryAgent:
         redactor: Redactor,
         operator: Operator | None = None,
         probes: list[str] | None = None,
+        on_phase_start: Any | None = None,
         max_goal_steps: int = 22,
         max_probe_steps: int = 16,
         run_id: str | None = None,
@@ -137,6 +139,12 @@ class DiscoveryAgent:
         self.redactor = redactor
         self.operator = operator
         self.probes = probes if probes is not None else DEFAULT_PROBES
+        # Lets the platform stage a sandbox condition before a phase — e.g. put
+        # the host into a fault state so the agent can *observe* an application
+        # error instead of guessing its wording. This is operator tooling, run
+        # out of band: the agent itself still cannot reach the fault endpoint,
+        # because the allowlist denies it.
+        self.on_phase_start = on_phase_start
         self.max_goal_steps = max_goal_steps
         self.max_probe_steps = max_probe_steps
         self.run_id = run_id or control.run_id
@@ -200,7 +208,9 @@ class DiscoveryAgent:
             run_id=self.run_id, goal=self.goal, success=success, stop_reason=stop_reason,
             summary=summary, actions=self.actions, outputs=self.outputs, outcomes=self.outcomes,
             recoveries=self.recoveries, failures=self.failures, escalations=self.escalations,
-            entry_point=self.entry_point, model=self.llm.model, model_calls=self.llm.calls,
+            entry_point=self.entry_point,
+            input_values={k: str(v) for k, v in self.inputs.items()},
+            model=self.llm.model, model_calls=self.llm.calls,
             usage=dict(self.llm.usage), evidence_dir=self.evidence.rel(self.evidence.root),
         )
 
@@ -220,9 +230,14 @@ class DiscoveryAgent:
 
     def _phase(self, phase: str, prompt: str, max_steps: int) -> tuple[str, str, bool]:
         self.log.log("phase_started", detail=phase, max_steps=max_steps)
+        if self.on_phase_start is not None:
+            staged = self.on_phase_start(phase)
+            if staged:
+                self.log.log("sandbox_fault_staged", detail=str(staged), phase_name=phase)
         obs = self._observe(phase)
         self._messages.append({"role": "user", "content": self._user_blocks(prompt, obs, [])})
         steps = 0
+        nudged = False
 
         while True:
             if steps >= max_steps:
@@ -238,6 +253,22 @@ class DiscoveryAgent:
                 self.log.log("model_reasoning", detail=call.text[:400])
 
             if not call.tool_calls:
+                if not nudged:
+                    # A turn with prose and no tool call is usually the model
+                    # narrating a dead end. Say so once before abandoning a run
+                    # that may be one action from done.
+                    nudged = True
+                    self.log.log("model_nudged", detail=call.text[:200])
+                    self._messages.append({"role": "assistant",
+                                           "content": call.text or "(no output)"})
+                    self._messages.append({"role": "user", "content": [{
+                        "type": "text",
+                        "text": "You did not take an action. Every turn must call exactly one "
+                                "tool. If you are blocked, call request_human_help; if the phase "
+                                "is done, call finish; otherwise take the next action. Note that "
+                                "record fields that are not controls appear under LABELLED "
+                                "VALUES in the observation and have refs you can extract from."}]})
+                    continue
                 self.log.log("stopping_condition", reason="no_action",
                              detail=call.text[:200] or "model returned no tool call")
                 return "no_action", call.text[:400] or "model stopped without acting", phase != "goal"
@@ -418,14 +449,26 @@ class DiscoveryAgent:
             return _tool_result(tool["id"], f"ref {args.get('ref')!r} is not on the current screen",
                                 error=True)
         value = self.surface.read_node(node, "text") or node.text
+        sensitivity = str(args.get("sensitivity", "internal"))
+
+        # The moment a value is classified as sensitive, register it — so every
+        # subsequent write masks it. Discovery is where sensitivity is *learned*,
+        # so this is the earliest point at which it can be enforced; anything
+        # captured before the declaration (screenshots, the observation the model
+        # was shown) inevitably still contains it, which is why discovery is run
+        # against fixture data. See REPORT.md § Safety.
+        if sensitivity in {"pii", "secret"} and value.strip():
+            self.redactor.register(value.strip(), f"output:{args['name']}")
+
+        # Re-declaring an output corrects it rather than adding a duplicate.
+        self.outputs = [o for o in self.outputs if o.name != str(args["name"])]
         self.outputs.append(DeclaredOutput(
             name=str(args["name"]), node=node, observation=_light(obs),
             type=str(args.get("type", "string")), description=str(args.get("description", "")),
-            sensitivity=str(args.get("sensitivity", "internal")),
+            sensitivity=sensitivity,
         ))
         self.log.log("output_declared", output=args["name"], type=args.get("type"),
-                     sensitivity=args.get("sensitivity", "internal"),
-                     detail=self.redactor.scrub_text(value))
+                     sensitivity=sensitivity, detail=self.redactor.scrub_text(value))
         return _tool_result(tool["id"], f"recorded output {args['name']!r} = "
                                         f"{self.redactor.scrub_text(value)!r}")
 

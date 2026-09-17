@@ -1,0 +1,54 @@
+{
+  "capabilities": [
+    {
+      "capability_id": "member_savings_balance_lookup",
+      "version": "1.0.0",
+      "name": "Member savings balance lookup",
+      "status": "approved",
+      "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.",
+      "surface": "web",
+      "tenant": "riverbend_cu",
+      "variant": "base",
+      "inputs": [
+        {
+          "name": "operator_id",
+          "type": "string",
+          "required": true,
+          "source": "environment"
+        },
+        {
+          "name": "operator_passcode",
+          "type": "string",
+          "required": true,
+          "source": "environment"
+        },
+        {
+          "name": "member_id",
+          "type": "string",
+          "required": true,
+          "source": "caller"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "current_savings_balance",
+          "type": "decimal"
+        },
+        {
+          "name": "savings_account_status",
+          "type": "string"
+        },
+        {
+          "name": "member_name",
+          "type": "string"
+        }
+      ],
+      "business_outcomes": [
+        "member_not_found",
+        "member_access_restricted"
+      ],
+      "path": "artifacts/member_savings_balance_lookup/v1.0.0.json",
+      "checksum": "sha256:0fe2dd5ae0035f369cd90882ce076ff6f2180679253a3e3e6a9546c1145c9d6a"
+    }
+  ]
+}

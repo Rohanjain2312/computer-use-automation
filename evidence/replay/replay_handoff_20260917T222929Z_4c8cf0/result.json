@@ -1,0 +1,398 @@
+{
+  "run_id": "replay_handoff_20260917T222929Z_4c8cf0",
+  "capability_id": "member_savings_balance_lookup",
+  "capability_version": "1.0.0",
+  "status": "success",
+  "started_at": "2026-09-17T22:29:30.234Z",
+  "finished_at": "2026-09-17T22:29:40.950Z",
+  "duration_ms": 10716,
+  "inputs_echo": {
+    "operator_id": "[REDACTED]:input",
+    "operator_passcode": "[REDACTED]",
+    "member_id": "100999"
+  },
+  "outputs": {
+    "current_savings_balance": "27640.18",
+    "savings_account_status": "OPEN",
+    "member_name": "[REDACTED]:output:member_name"
+  },
+  "outcome": null,
+  "failure": null,
+  "steps": [
+    {
+      "id": "s00_open",
+      "index": 0,
+      "intent": "Open the servicing console entry point",
+      "action": "navigate",
+      "status": "ok",
+      "duration_ms": 660,
+      "strategy_used": null,
+      "strategy_confidence": null,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "role_name {'role': 'textbox', 'name': 'Operator ID'} matched 1 control(s) (expected >=1)",
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/001_00_s00_open.png"
+      ]
+    },
+    {
+      "id": "s01_enter_operator_id_sign",
+      "index": 1,
+      "intent": "Enter the operator ID to sign on",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1157,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/002_01_s01_enter_operator_id_sign.png"
+      ]
+    },
+    {
+      "id": "s02_enter_operator_passcode_sign",
+      "index": 2,
+      "intent": "Enter the operator passcode to sign on",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1364,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/003_02_s02_enter_operator_passcode_sign.png"
+      ]
+    },
+    {
+      "id": "s03_sign_servicing_console",
+      "index": 3,
+      "intent": "Sign on to the servicing console",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 999,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Select a function from the navigation pane.' found on screen (expected present)",
+      "risk": "reversible_write",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/004_03_s03_sign_servicing_console.png"
+      ]
+    },
+    {
+      "id": "s04_open_member_servicing_look_up_memb",
+      "index": 4,
+      "intent": "Open Member Servicing to look up the member",
+      "action": "click",
+      "status": "recovered",
+      "duration_ms": 1517,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Member Servicing \u2014 Inquiry' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [
+        "recovered via 'system_maintenance_notice' (attempt 1)"
+      ],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/005_04_s04_open_member_servicing_look_up_memb.png"
+      ]
+    },
+    {
+      "id": "s05_enter_member_number_look_up",
+      "index": 5,
+      "intent": "Enter the member number to look up",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1114,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/006_05_s05_enter_member_number_look_up.png"
+      ]
+    },
+    {
+      "id": "s06_search_member_s_account_summary",
+      "index": 6,
+      "intent": "Search for the member's account summary",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 3481,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Balances are as of the last posted business day.' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [
+        "escalated on business outcome 'member_access_restricted'"
+      ],
+      "evidence": [
+        "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/011_06_s06_search_member_s_account_summary.png"
+      ]
+    }
+  ],
+  "recoveries": [
+    {
+      "rule": "system_maintenance_notice",
+      "step_id": "s04_open_member_servicing_look_up_memb",
+      "attempt": 1,
+      "during": "wait",
+      "applied": true,
+      "then": "retry_step",
+      "detail": "A one-time System Notice interstitial appears the first time Member Servicing is opened after sign-on, warning about a scheduled maintenance window. It is cleared by clicking the 'Acknowledge and Continue' button, after which the Member Servicing lookup screen appears normally. It does not reappear later in the same session."
+    }
+  ],
+  "escalations": [
+    {
+      "intervention_id": "int_433cf30a0f",
+      "reason_class": "business_outcome:member_access_restricted",
+      "reason": "Member the requested record is flagged EXECUTIVE SERVICES. A supervisor override is required to continue. The console shows an 'Access Restricted' panel with a 'Supervisor Override' button that a supervisor can use on this same session to clear the restriction and let the run continue.",
+      "step_id": "s06_search_member_s_account_summary",
+      "operator": "scripted-operator",
+      "resolution": "resumed",
+      "outcome_name": "member_access_restricted",
+      "human_actions": [
+        {
+          "at": "2026-09-17T22:29:38.805Z",
+          "kind": "navigation",
+          "description": "frame 'bodypane' moved to a new page",
+          "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:38.294Z",
+          "kind": "click",
+          "description": "clicked the 'Supervisor Override' button",
+          "frame_url": "http://127.0.0.1:8799/members/100999",
+          "value": null,
+          "coordinates": [
+            736.0,
+            214.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:38.982Z",
+          "kind": "click",
+          "description": "clicked the 'Override Code' textbox",
+          "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+          "value": null,
+          "coordinates": [
+            561.0,
+            161.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:40.297Z",
+          "kind": "navigation",
+          "description": "frame 'bodypane' moved to a new page",
+          "frame_url": "http://127.0.0.1:8799/members/100999",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:39.788Z",
+          "kind": "input",
+          "description": "entered a value into 'Override Code'",
+          "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+          "value": "[REDACTED:secret-field]",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:39.788Z",
+          "kind": "click",
+          "description": "clicked the 'Apply Override' button",
+          "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+          "value": null,
+          "coordinates": [
+            724.0,
+            188.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-17T22:29:39.789Z",
+          "kind": "submit",
+          "description": "submitted form 'f1'",
+          "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        }
+      ],
+      "screenshot": "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/screens/008_intervention_s06_search_member_s_account_summary.png",
+      "dom_snapshot": "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/snapshots/intervention_s06_search_member_s_account_summary.dom.html"
+    }
+  ],
+  "control_log": [
+    {
+      "at": "2026-09-17T22:29:29.878Z",
+      "kind": "session_opened",
+      "from_owner": null,
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run started",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-17T22:29:38.082Z",
+      "kind": "automation_paused",
+      "from_owner": "automation",
+      "to_owner": "automation",
+      "state": "paused_pending_human",
+      "reason": "Member the requested record is flagged EXECUTIVE SERVICES. A supervisor override is required to continue. The console shows an 'Access Restricted' panel with a 'Supervisor Override' button that a supervisor can use on this same session to clear the restriction and let the run continue.",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-17T22:29:38.082Z",
+      "kind": "control_granted",
+      "from_owner": "automation",
+      "to_owner": "human",
+      "state": "human_control",
+      "reason": "human took control of the live session",
+      "actor": "sim.supervisor"
+    },
+    {
+      "at": "2026-09-17T22:29:40.335Z",
+      "kind": "control_released",
+      "from_owner": "human",
+      "to_owner": "automation",
+      "state": "resuming",
+      "reason": "manual remediation complete",
+      "actor": "sim.supervisor"
+    },
+    {
+      "at": "2026-09-17T22:29:40.335Z",
+      "kind": "automation_resumed",
+      "from_owner": "automation",
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run continues",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-17T22:29:40.950Z",
+      "kind": "session_closed",
+      "from_owner": "automation",
+      "to_owner": null,
+      "state": "completed",
+      "reason": "capability completed successfully",
+      "actor": "system"
+    }
+  ],
+  "human_actions": [
+    {
+      "at": "2026-09-17T22:29:38.805Z",
+      "kind": "navigation",
+      "description": "frame 'bodypane' moved to a new page",
+      "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+      "value": null,
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:38.294Z",
+      "kind": "click",
+      "description": "clicked the 'Supervisor Override' button",
+      "frame_url": "http://127.0.0.1:8799/members/100999",
+      "value": null,
+      "coordinates": [
+        736.0,
+        214.0
+      ],
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:38.982Z",
+      "kind": "click",
+      "description": "clicked the 'Override Code' textbox",
+      "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+      "value": null,
+      "coordinates": [
+        561.0,
+        161.0
+      ],
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:40.297Z",
+      "kind": "navigation",
+      "description": "frame 'bodypane' moved to a new page",
+      "frame_url": "http://127.0.0.1:8799/members/100999",
+      "value": null,
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:39.788Z",
+      "kind": "input",
+      "description": "entered a value into 'Override Code'",
+      "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+      "value": "[REDACTED:secret-field]",
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:39.788Z",
+      "kind": "click",
+      "description": "clicked the 'Apply Override' button",
+      "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+      "value": null,
+      "coordinates": [
+        724.0,
+        188.0
+      ],
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-17T22:29:39.789Z",
+      "kind": "submit",
+      "description": "submitted form 'f1'",
+      "frame_url": "http://127.0.0.1:8799/override?mbr=100999",
+      "value": null,
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    }
+  ],
+  "llm_used": false,
+  "evidence_dir": "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0",
+  "log_path": "evidence/replay/replay_handoff_20260917T222929Z_4c8cf0/run.jsonl"
+}

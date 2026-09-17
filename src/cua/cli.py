@@ -151,6 +151,7 @@ def discover(
     for value in secrets:
         redactor.register(value, "input")
 
+    rehearsal = (spec.get("discovery") or {}).get("fault_rehearsal") or {}
     evidence = EvidenceWriter("discovery", run_id, redactor)
     logger = RunLogger(evidence.log_path, run_id=run_id, phase="discovery", redactor=redactor)
     control = SessionControl(run_id=run_id)
@@ -170,7 +171,8 @@ def discover(
             input_specs=input_specs, output_hints=list(spec.get("outputs") or []),
             surface=surface, gate=gate, llm=llm, logger=logger, evidence=evidence,
             control=control, redactor=redactor, operator=op,
-            probes=(spec.get("discovery") or {}).get("probes") if probe else [],
+            probes=_probes(spec, rehearsal) if probe else [],
+            on_phase_start=_fault_stager(rehearsal, base_url) if probe else None,
             run_id=run_id,
         )
         result = agent.run()
@@ -216,6 +218,8 @@ def discover(
         surface.close()
         if console is not None:
             console.stop()
+        if rehearsal:
+            _set_fault("none", base_url)
 
     issues = validate_artifact(artifact)
     for issue in issues:
@@ -234,6 +238,41 @@ def discover(
                        profile=profile, headed=False, operator_mode="scripted",
                        console_port=console_port, label="smoke", promote=True)
         raise typer.Exit(code)
+
+
+def _probes(spec: dict[str, Any], rehearsal: dict[str, Any]) -> list[str]:
+    probes = list((spec.get("discovery") or {}).get("probes") or [])
+    if rehearsal.get("probe"):
+        probes.append(rehearsal["probe"])
+    return probes
+
+
+def _set_fault(mode: str, base_url: str) -> str:
+    import urllib.request
+
+    url = f"{base_url.rstrip('/')}/admin/inject?mode={mode}"
+    with urllib.request.urlopen(url, timeout=5) as resp:
+        return resp.read().decode()
+
+
+def _fault_stager(rehearsal: dict[str, Any], base_url: str):
+    """Stage a sandbox fault for the probe phase.
+
+    Discovery can only record an application error if it *sees* one, and the
+    agent must not be able to cause one itself — the allowlist denies the fault
+    endpoint. So the platform stages it out of band, exactly as a release
+    engineer would arrange a fault in a sandbox before recording a capability.
+    """
+    if not rehearsal.get("mode"):
+        return None
+
+    def stage(phase: str) -> str | None:
+        if phase != "probe":
+            return None
+        _set_fault(rehearsal["mode"], base_url)
+        return f"staged fault {rehearsal['mode']!r} on the sandbox for the probe phase"
+
+    return stage
 
 
 def _as_input_spec(raw: dict[str, Any]):
@@ -342,6 +381,9 @@ def _replay(*, artifact_path: Path, inputs: dict[str, str], base_url: str, profi
 
     if promote and result.status is ReplayStatus.success:
         promoted = artifact.model_copy(update={
+            # Clearing the checksum is required, not incidental: the store
+            # re-signs on save, and a stale signature is a validation error.
+            "checksum": None,
             "status": ArtifactStatus.approved,
             "verification": artifact.verification.model_copy(update={
                 "smoke_replay_run_id": run_id,
@@ -354,6 +396,29 @@ def _replay(*, artifact_path: Path, inputs: dict[str, str], base_url: str, profi
                     fg=typer.colors.GREEN)
 
     return 0 if result.status in {ReplayStatus.success, ReplayStatus.business_outcome} else 1
+
+
+@app.command()
+def approve(
+    capability: str = typer.Argument(..., help="Capability id to verify and approve."),
+    inputs: list[str] = typer.Option(None, "--input", "-i",
+                                     help="Inputs for the verification replay."),
+    version: str = typer.Option(None, "--artifact-version"),
+    base_url: str = typer.Option(DEFAULT_BASE_URL, "--base-url"),
+) -> None:
+    """Verify a draft artifact by replaying it, then promote it to approved.
+
+    Approval is earned by a run, not asserted: the artifact is only promoted if a
+    real replay of it succeeds, and the run id that verified it is recorded.
+    """
+    _load_dotenv()
+    store = ArtifactStore()
+    artifact = store.get(capability, version)
+    path = store.path_for(artifact.capability_id, artifact.version)
+    code = _replay(artifact_path=path, inputs=_parse_inputs(inputs), base_url=base_url,
+                   profile=artifact.safety.allowlist_profile, headed=False,
+                   operator_mode="none", console_port=8811, label="verify", promote=True)
+    raise typer.Exit(code)
 
 
 # ------------------------------------------------------------------- catalog

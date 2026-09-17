@@ -8,6 +8,7 @@ replay representation.
 
 from __future__ import annotations
 
+import inspect
 import json
 import os
 import time
@@ -221,7 +222,7 @@ class LlmClient:
         redactor: Redactor,
         evidence: EvidenceWriter,
         max_tokens: int = 1600,
-        temperature: float = 0.0,
+        effort: str | None = None,
     ) -> None:
         try:
             from anthropic import Anthropic
@@ -237,40 +238,67 @@ class LlmClient:
         self.redactor = redactor
         self.evidence = evidence
         self.max_tokens = max_tokens
-        self.temperature = temperature
+        self.effort = effort or os.environ.get("CUA_EFFORT") or None
+        # The SDK's sampling knobs have moved between versions (`temperature`
+        # became `output_config.effort`). Rather than pin a version, ask the
+        # installed client what it accepts.
+        try:
+            self._supported = set(
+                inspect.signature(self._client.messages.create).parameters
+            )
+        except (TypeError, ValueError):  # pragma: no cover - defensive
+            self._supported = set()
         self.calls = 0
         self.usage = {"input_tokens": 0, "output_tokens": 0}
         self._trace_lines: list[str] = []
 
     # -- transport --------------------------------------------------------
 
+    def _kwargs(self, model: str, system: str, messages: list[dict[str, Any]],
+                tools: list[dict[str, Any]]) -> dict[str, Any]:
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "max_tokens": self.max_tokens,
+            "system": system,
+            "tools": tools,
+            "messages": messages,
+        }
+        if self.effort and "output_config" in self._supported:
+            kwargs["output_config"] = {"effort": self.effort}
+        elif self.effort and "temperature" in self._supported:
+            kwargs["temperature"] = 0.0
+        return kwargs
+
     def complete(self, *, system: str, messages: list[dict[str, Any]],
                  tools: list[dict[str, Any]]) -> LlmCall:
         last_error: Exception | None = None
         models = [self.model] + [m for m in MODEL_FALLBACKS if m != self.model]
+        tried: list[str] = []
         for model in models:
+            tried.append(model)
             for attempt in range(3):
                 try:
                     response = self._client.messages.create(
-                        model=model,
-                        max_tokens=self.max_tokens,
-                        temperature=self.temperature,
-                        system=system,
-                        tools=tools,
-                        messages=messages,
+                        **self._kwargs(model, system, messages, tools)
                     )
                     self.model = model
                     self.calls += 1
                     return self._record(response, messages)
+                except TypeError as exc:
+                    # A client-side signature mismatch will fail identically for
+                    # every model; retrying wastes time and hides the real cause.
+                    raise RuntimeError(
+                        f"the installed anthropic SDK rejected the request shape: {exc}"
+                    ) from exc
                 except Exception as exc:
                     last_error = exc
-                    text = str(exc)
-                    if "not_found" in text or "model" in text.lower() and "404" in text:
-                        break  # try the next model
+                    status = getattr(exc, "status_code", None)
+                    if status in {400, 401, 403, 404} or "not_found" in str(exc):
+                        break  # a different model may exist; retrying this one will not help
                     if attempt == 2:
                         break
                     time.sleep(1.5 * (attempt + 1))
-        raise RuntimeError(f"model call failed for {models}: {last_error}")
+        raise RuntimeError(f"model call failed for {tried}: {last_error}")
 
     def _record(self, response: Any, messages: list[dict[str, Any]]) -> LlmCall:
         text_parts: list[str] = []

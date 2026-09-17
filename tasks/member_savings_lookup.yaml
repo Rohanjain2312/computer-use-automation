@@ -67,3 +67,14 @@ discovery:
     - "Did any notice or interstitial screen appear during sign-on or before the
        first search that the automation would have to acknowledge? If so, record
        how it is cleared."
+
+  # The agent cannot cause an application fault — the allowlist denies the
+  # fault-injection endpoint. The platform stages one on the sandbox for the
+  # probe phase so the agent can read the real error wording rather than guess
+  # it. Remove this block to record against an instance you cannot fault.
+  fault_rehearsal:
+    mode: app_error
+    probe: "The platform has put the sandbox host into a deliberate fault state
+      for this phase. Look up member 100244 once more. The lookup will fail with
+      a host error — copy its exact wording and register it with declare_failure,
+      because a run that hits this must stop rather than treat it as an answer."

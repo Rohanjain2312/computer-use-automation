@@ -151,3 +151,78 @@ def test_fixture_artifact_steps_all_carry_a_portable_strategy():
             [o.extract.target for o in artifact.outputs]
     for plan in plans:
         assert any(s.kind in PORTABLE_STRATEGIES for s in plan.strategies), plan.description
+
+
+# -- checkpoints must describe the screen, not the record -----------------
+
+
+def test_a_checkpoint_never_carries_the_run_s_own_data():
+    """Otherwise the artifact leaks PII and only ever replays for one member."""
+    volatile = {"100244", "Dana Whitfield", "$4,812.37"}
+    checkpoint = _derive_checkpoint(
+        action(before="Member Lookup",
+               after="Member Record\nMember Name Dana Whitfield Member Since 2014-03-19\n"
+                     "Account Detail"),
+        volatile=volatile)
+    assert checkpoint is not None
+    assert "Dana Whitfield" not in checkpoint.params["text"]
+    assert checkpoint.params["text"] == "Account Detail"
+
+
+def test_a_model_expectation_containing_data_is_also_rejected():
+    checkpoint = _derive_checkpoint(
+        action(expect="Member Name Dana Whitfield",
+               before="Member Lookup", after="Member Name Dana Whitfield\nAccount Detail"),
+        volatile={"Dana Whitfield"})
+    assert "Dana Whitfield" not in (checkpoint.params.get("text") or "")
+
+
+def test_distinctive_prefers_a_screen_label_over_a_data_row():
+    text = "Account Summary\nMember Since 2014-03-19 Branch 014 Opened 2019-11-04"
+    assert _distinctive(text, set()) == "Account Summary"
+
+
+# -- detectors must generalise beyond the record that was probed ----------
+
+
+def test_a_marker_carrying_probe_data_is_trimmed_to_generalisable_wording():
+    from cua.discovery.synthesize import _ground_marker
+
+    marker = _ground_marker(
+        "No member matching that number was found. Searched member number: 999999",
+        {"999999"})
+    assert marker == "No member matching that number was found."
+
+
+def test_a_marker_that_is_entirely_record_specific_is_dropped():
+    from cua.discovery.synthesize import _ground_marker
+
+    assert _ground_marker("Member 100999 is restricted", {"100999"}) == ""
+
+
+def test_a_clean_marker_is_left_alone():
+    from cua.discovery.synthesize import _ground_marker
+
+    text = "You do not have permission to view this member."
+    assert _ground_marker(text, {"100999"}) == text
+
+
+def test_messages_do_not_name_the_record_the_recording_used():
+    from cua.discovery.synthesize import _sanitize_message
+
+    out = _sanitize_message("Member 100999 is flagged EXECUTIVE SERVICES.", {"100999"})
+    assert "100999" not in out and "EXECUTIVE SERVICES" in out
+
+
+def test_a_value_target_is_described_without_its_value():
+    """The reviewer should read 'the cell beside Member Name', not the name itself."""
+    from cua.locate.candidates import build_target_plan
+
+    nodes = [node("k", "cell", "Member Name"),
+             node("v", "cell", "Dana Whitfield", label_left="Member Name",
+                  table={"headers": ["a", "b"], "row_index": 1, "col_index": 1,
+                         "row_label": "Member Name", "col_header": "b",
+                         "header_confident": False})]
+    plan = build_target_plan(nodes[1], observation(nodes), purpose="value")
+    assert "Dana Whitfield" not in plan.description
+    assert "Member Name" in plan.description

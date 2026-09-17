@@ -191,12 +191,17 @@ def build_target_plan(
     if not strategies:  # pragma: no cover - viewport_ratio always survives
         raise ValueError(f"no targeting strategy could be derived for {node!r}")
 
-    label = description or _describe(node)
+    label = description or _describe(node, is_value)
     return TargetPlan(description=label, strategies=strategies, frame=node.frame_name or None)
 
 
-def _describe(node: UiNode) -> str:
+def _describe(node: UiNode, is_value: bool = False) -> str:
+    """Name the target the way a reviewer would — never by the datum it holds."""
     if node.table and node.table.col_header and node.table.header_confident:
         return f"the {node.table.col_header!r} cell of the {node.table.row_label!r} row"
+    if is_value:
+        if node.label_left:
+            return f"the value cell beside the {node.label_left!r} label"
+        return f"the {node.role} holding the extracted value"
     label = node.name or node.text or "(unnamed)"
     return f"the {label!r} {node.role}"

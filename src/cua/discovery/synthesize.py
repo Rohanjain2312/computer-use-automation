@@ -87,15 +87,31 @@ def synthesize(
         raise SynthesisError("discovery recorded no goal-phase actions; nothing to synthesize")
 
     inputs = _build_inputs(input_specs, goal_actions, notes)
-    outcomes = _build_outcomes(discovery, notes)
-    failures = _build_failures(discovery, notes)
+    # The run's own data: the values it was given and the values it read. None of
+    # it belongs in a checkpoint or a recorded URL.
+    volatile = {str(v) for v in discovery.input_values.values() if v}
+    volatile |= {d.node.text.strip() for d in discovery.outputs if d.node.text.strip()}
+    # Also everything the run typed in — the probe phase deliberately enters
+    # record identifiers that must not become part of the capability.
+    volatile |= {a.literal.strip() for a in discovery.actions
+                 if a.literal and len(a.literal.strip()) >= 3}
+
+    outcomes = _build_outcomes(discovery, notes, volatile)
+    failures = _build_failures(discovery, notes, volatile)
+
+    recovery_markers = [_ground_marker(str(r.get("marker_text") or ""), volatile)
+                        for r in discovery.recoveries
+                        if r.get("marker_verified") and r.get("marker_text")]
+    recovery_markers = [m for m in recovery_markers if m]
 
     # Any recognized terminal wording short-circuits a wait, so a run that hits
     # an error page fails in milliseconds instead of burning the full timeout.
     terminal_markers = [r.when for r in outcomes] + [r.when for r in failures]
 
-    steps = _build_steps(discovery, goal_actions, base_url, terminal_markers, notes)
-    recoveries = _build_recoveries(discovery, steps, notes)
+    steps = _build_steps(discovery, goal_actions, base_url, terminal_markers, notes,
+                         input_values=discovery.input_values,
+                         recovery_markers=recovery_markers, volatile=volatile)
+    recoveries = _build_recoveries(discovery, steps, notes, volatile)
     outputs = _build_outputs(discovery, viewport, notes)
     success = _build_success_condition(steps, outputs)
 
@@ -147,11 +163,47 @@ def synthesize(
 
 
 def _build_steps(discovery: DiscoveryResult, actions: list[RecordedAction], base_url: str,
-                 terminal_markers: list[Predicate], notes: list[str]) -> list[Step]:
+                 terminal_markers: list[Predicate], notes: list[str],
+                 input_values: dict[str, str] | None = None,
+                 recovery_markers: list[str] | None = None,
+                 volatile: set[str] | None = None) -> list[Step]:
+    recovery_markers = recovery_markers or []
+    volatile = volatile or set()
+
+    def is_recovery_screen(obs: Observation) -> bool:
+        text = _norm(obs.text)
+        return any(_norm(m) in text for m in recovery_markers)
+
+    # An action that only dismissed an interstitial is not part of the flow —
+    # the recovery rule already handles that screen, whenever it appears. Keeping
+    # it as a step would make the run depend on the interstitial being there.
+    kept: list[RecordedAction] = []
+    for action in actions:
+        if recovery_markers and is_recovery_screen(action.obs_before) and \
+                action.action is ActionKind.click:
+            notes.append(
+                f"dropped the step that dismissed the interstitial ({action.intent!r}); "
+                "it is covered by a recovery rule, which fires whenever the screen appears")
+            continue
+        kept.append(action)
+    actions = kept or actions
+
+    # When a step lands on an interstitial, the state it was actually reaching
+    # for is the one after the interstitial is cleared.
+    effective_after: list[Observation] = []
+    for i, action in enumerate(actions):
+        after = action.obs_after
+        if recovery_markers and is_recovery_screen(after):
+            nxt = next((a.obs_before for a in actions[i + 1:]
+                        if not is_recovery_screen(a.obs_before)), None)
+            if nxt is not None:
+                after = nxt
+        effective_after.append(after)
+
     steps: list[Step] = []
     first = actions[0]
 
-    entry_checkpoint = _entry_checkpoint(first)
+    entry_checkpoint = _entry_checkpoint(first, volatile)
     steps.append(
         Step(
             id="s00_open",
@@ -168,7 +220,7 @@ def _build_steps(discovery: DiscoveryResult, actions: list[RecordedAction], base
     signon_open = True
     for i, action in enumerate(actions):
         step_id = f"s{i + 1:02d}_{_slug(action.intent)}"
-        checkpoint = _derive_checkpoint(action)
+        checkpoint = _derive_checkpoint(action, volatile=volatile, after=effective_after[i])
         wait_until = _wait_condition(checkpoint, terminal_markers)
         target = None
         if action.node is not None:
@@ -190,7 +242,7 @@ def _build_steps(discovery: DiscoveryResult, actions: list[RecordedAction], base
 
         if checkpoint is None and action.action in {ActionKind.click, ActionKind.navigate,
                                                     ActionKind.press}:
-            checkpoint = _fallback_checkpoint(action)
+            checkpoint = _fallback_checkpoint(action, effective_after[i])
             if checkpoint is None:
                 notes.append(
                     f"step {step_id!r} produced no observable state change; marked optional")
@@ -201,7 +253,8 @@ def _build_steps(discovery: DiscoveryResult, actions: list[RecordedAction], base
                 action=action.action,
                 target=target,
                 value=value,
-                url=("{{ config.base_url }}" + _path_of(action.url, base_url)) if action.url else None,
+                url=("{{ config.base_url }}" + _path_of(action.url, base_url, input_values))
+                if action.url else None,
                 key=action.key,
                 risk=action.risk,
                 wait=WaitSpec(until=wait_until, timeout_ms=15_000),
@@ -219,7 +272,7 @@ def discovery_viewport(action: RecordedAction) -> dict[str, int]:
     return {"width": 1280, "height": 900}
 
 
-def _entry_checkpoint(first: RecordedAction) -> Predicate:
+def _entry_checkpoint(first: RecordedAction, volatile: set[str] | None = None) -> Predicate:
     obs = first.obs_before
     if first.node is not None and first.node.name:
         return Predicate(
@@ -229,25 +282,33 @@ def _entry_checkpoint(first: RecordedAction) -> Predicate:
             description=f"the {first.node.name!r} control is on screen, "
                         "so the entry screen finished loading",
         )
-    marker = _distinctive(obs.text, set())
+    marker = _distinctive(obs.text, set(), volatile=volatile)
     return Predicate(kind="text_present", params={"text": marker},
                      description=f"the entry screen shows {marker!r}")
 
 
-def _derive_checkpoint(action: RecordedAction) -> Predicate | None:
-    """Prefer what the model said it expected; fall back to what actually changed."""
-    after = action.obs_after
+def _derive_checkpoint(action: RecordedAction, *, volatile: set[str] | None = None,
+                       after: Observation | None = None) -> Predicate | None:
+    """Prefer what the model said it expected; fall back to what actually changed.
+
+    ``volatile`` holds the run's own data — the member number it was given, the
+    balance and name it read. None of it may end up in a checkpoint: a checkpoint
+    asserting "Dana Whitfield is on screen" is both a PII leak and an assertion
+    that only one member's lookup can ever satisfy.
+    """
+    volatile = volatile or set()
+    after = after or action.obs_after
     before = action.obs_before
 
     if action.expect:
         marker = action.expect.strip().strip('"').strip("'")[:90]
-        if marker and _norm(marker) in _norm(after.text):
+        if marker and _norm(marker) in _norm(after.text) and not _carries_data(marker, volatile):
             return Predicate(
                 kind="text_present", params={"text": marker},
                 description=f"after this step the screen shows {marker!r}",
             )
 
-    new_marker = _distinctive(after.text, _lines(before.text))
+    new_marker = _distinctive(after.text, _lines(before.text), volatile=volatile)
     if new_marker:
         return Predicate(
             kind="text_present", params={"text": new_marker},
@@ -263,8 +324,13 @@ def _derive_checkpoint(action: RecordedAction) -> Predicate | None:
     return None
 
 
-def _fallback_checkpoint(action: RecordedAction) -> Predicate | None:
-    changed = _changed_url(action.obs_before, action.obs_after)
+def _carries_data(text: str, volatile: set[str]) -> bool:
+    low = (text or "").casefold()
+    return any(v and v.casefold() in low for v in volatile)
+
+
+def _fallback_checkpoint(action: RecordedAction, after: Observation | None = None) -> Predicate | None:
+    changed = _changed_url(action.obs_before, after or action.obs_after)
     if changed:
         return Predicate(kind="url_matches", params={"pattern": changed, "scope": "any"},
                          description=f"a frame is at a URL matching {changed}")
@@ -306,7 +372,8 @@ def _build_inputs(specs: list[dict[str, Any]], actions: list[RecordedAction],
                 pattern=spec.get("pattern"),
                 example=spec.get("example") if sensitivity in {Sensitivity.public,
                                                                Sensitivity.internal} else None,
-                source="environment" if sensitivity is Sensitivity.secret else "caller",
+                source=spec.get(
+                "source", "environment" if sensitivity is Sensitivity.secret else "caller"),
                 env_var=spec.get("env_var"),
             )
         )
@@ -352,16 +419,53 @@ def _build_outputs(discovery: DiscoveryResult, viewport: dict[str, int],
 # -------------------------------------------------------- conditions / rules
 
 
-def _build_outcomes(discovery: DiscoveryResult, notes: list[str]) -> list[OutcomeRule]:
+def _ground_marker(marker: str, volatile: set[str]) -> str:
+    """Strip run-specific data out of a detector's marker text.
+
+    A detector that matches "Searched member number: 999999" would only ever
+    fire for the member the recording happened to probe. When a marker carries
+    data, keep the longest data-free sentence instead; if there is none, the
+    marker cannot be generalised and the rule is dropped.
+    """
+    text = " ".join((marker or "").split())
+    if not text:
+        return ""
+    if not _carries_data(text, volatile):
+        return text[:120]
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+|\n+", text) if p.strip()]
+    clean = [p for p in parts if not _carries_data(p, volatile) and len(p) >= 12]
+    return max(clean, key=len)[:120] if clean else ""
+
+
+def _sanitize_message(text: str | None, volatile: set[str]) -> str | None:
+    """Keep a human-readable message free of the record the recording used."""
+    if not text:
+        return text
+    out = text
+    for value in sorted(volatile, key=len, reverse=True):
+        if value and value in out:
+            out = out.replace(value, "the requested record")
+    return out
+
+
+def _build_outcomes(discovery: DiscoveryResult, notes: list[str],
+                    volatile: set[str] | None = None) -> list[OutcomeRule]:
     out: list[OutcomeRule] = []
     seen: set[str] = set()
     for declared in discovery.outcomes:
         name = _slug(declared.get("name", "outcome"))
         if name in seen:
             continue
-        marker = (declared.get("marker_text") or "").strip()
-        if not marker:
+        volatile = volatile or set()
+        raw_marker = (declared.get("marker_text") or "").strip()
+        marker = _ground_marker(raw_marker, volatile)
+        if not raw_marker:
             notes.append(f"business outcome {name!r} declared without marker text; dropped")
+            continue
+        if not marker:
+            notes.append(
+                f"business outcome {name!r} dropped: its marker text carries data specific to "
+                "this run and no generalisable wording remained")
             continue
         if not declared.get("marker_verified"):
             notes.append(
@@ -377,22 +481,24 @@ def _build_outcomes(discovery: DiscoveryResult, notes: list[str]) -> list[Outcom
         out.append(
             OutcomeRule(
                 name=name,
-                when=Predicate(kind="text_present", params={"text": marker[:120]},
+                when=Predicate(kind="text_present", params={"text": marker},
                                description=f"the screen shows {marker[:60]!r}"),
                 disposition=disposition,
-                message=declared.get("message", name),
-                remediation=declared.get("remediation"),
+                message=_sanitize_message(declared.get("message"), volatile) or name,
+                remediation=_sanitize_message(declared.get("remediation"), volatile),
             )
         )
     return out
 
 
-def _build_failures(discovery: DiscoveryResult, notes: list[str]) -> list[FailureRule]:
+def _build_failures(discovery: DiscoveryResult, notes: list[str],
+                    volatile: set[str] | None = None) -> list[FailureRule]:
+    volatile = volatile or set()
     out: list[FailureRule] = []
     seen: set[str] = set()
     for declared in discovery.failures:
         name = _slug(declared.get("name", "app_error"))
-        marker = (declared.get("marker_text") or "").strip()
+        marker = _ground_marker((declared.get("marker_text") or "").strip(), volatile)
         if not marker or name in seen:
             continue
         if not declared.get("marker_verified"):
@@ -402,17 +508,18 @@ def _build_failures(discovery: DiscoveryResult, notes: list[str]) -> list[Failur
         out.append(
             FailureRule(
                 name=name,
-                when=Predicate(kind="text_present", params={"text": marker[:120]},
+                when=Predicate(kind="text_present", params={"text": marker},
                                description=f"the screen shows {marker[:60]!r}"),
                 error_class=declared.get("error_class", "application_error"),
-                message=declared.get("message", name),
+                message=_sanitize_message(declared.get("message"), volatile) or name,
             )
         )
     return out
 
 
-def _build_recoveries(discovery: DiscoveryResult, steps: list[Step],
-                      notes: list[str]) -> list[RecoveryRule]:
+def _build_recoveries(discovery: DiscoveryResult, steps: list[Step], notes: list[str],
+                      volatile: set[str] | None = None) -> list[RecoveryRule]:
+    volatile = volatile or set()
     from ..artifact.schema import StrategyKind, TargetPlan, TargetStrategy
 
     out: list[RecoveryRule] = []
@@ -421,7 +528,7 @@ def _build_recoveries(discovery: DiscoveryResult, steps: list[Step],
 
     for declared in discovery.recoveries:
         name = _slug(declared.get("name", "recovery"))
-        marker = (declared.get("marker_text") or "").strip()
+        marker = _ground_marker((declared.get("marker_text") or "").strip(), volatile)
         control = (declared.get("control_name") or "").strip()
         if not marker or not control or name in seen:
             continue
@@ -444,7 +551,7 @@ def _build_recoveries(discovery: DiscoveryResult, steps: list[Step],
             require_unique=False,
         )
         actions = [RecoveryAction(action="click", target=plan)]
-        description = declared.get("description", "")
+        description = _sanitize_message(declared.get("description", ""), volatile) or ""
         then = RecoveryThen.retry_step
         resume_from: str | None = None
 
@@ -465,7 +572,7 @@ def _build_recoveries(discovery: DiscoveryResult, steps: list[Step],
         out.append(
             RecoveryRule(
                 name=name,
-                when=Predicate(kind="text_present", params={"text": marker[:120]},
+                when=Predicate(kind="text_present", params={"text": marker},
                                description=f"the screen shows {marker[:60]!r}"),
                 actions=actions,
                 then=then,
@@ -527,9 +634,15 @@ def _lines(text: str) -> set[str]:
     return {ln.strip() for ln in (text or "").splitlines() if ln.strip()}
 
 
-def _distinctive(text: str, exclude: set[str]) -> str:
-    """Pick a short, stable line that identifies this screen."""
-    best = ""
+def _distinctive(text: str, exclude: set[str], *, volatile: set[str] | None = None) -> str:
+    """Pick a line that identifies this *screen* rather than this *record*.
+
+    Scored, not just longest: a line carrying the run's own data is rejected
+    outright, and digits are penalised, because "Account Summary" identifies a
+    screen while "Member Since 2014-03-19" identifies one member's row.
+    """
+    volatile = volatile or set()
+    best, best_score = "", float("-inf")
     for line in (text or "").splitlines():
         candidate = line.strip()
         if not (8 <= len(candidate) <= 70) or candidate in exclude:
@@ -539,8 +652,12 @@ def _distinctive(text: str, exclude: set[str]) -> str:
         letters = sum(c.isalpha() for c in candidate)
         if letters < len(candidate) * 0.5:
             continue
-        if not best or len(candidate) > len(best):
-            best = candidate
+        if _carries_data(candidate, volatile):
+            continue
+        digits = sum(c.isdigit() for c in candidate)
+        score = len(candidate) - 6 * digits
+        if score > best_score:
+            best, best_score = candidate, score
     return best[:90]
 
 
@@ -569,9 +686,19 @@ def _canonical_path_pattern(url: str) -> str:
     return "/".join(segments) + "$"
 
 
-def _path_of(url: str | None, base_url: str) -> str:
+def _path_of(url: str | None, base_url: str, input_values: dict[str, str] | None = None) -> str:
+    """Strip the host, and turn any embedded input value into a placeholder.
+
+    A discovery run that navigates straight to ``/members/100244`` must not
+    record that member number as part of the capability.
+    """
     if not url:
         return "/"
     if url.startswith(base_url):
-        return url[len(base_url):] or "/"
-    return re.sub(r"^https?://[^/]+", "", url) or "/"
+        path = url[len(base_url):] or "/"
+    else:
+        path = re.sub(r"^https?://[^/]+", "", url) or "/"
+    for name, value in (input_values or {}).items():
+        if value and str(value) in path:
+            path = path.replace(str(value), "{{ inputs.%s }}" % name)
+    return path
