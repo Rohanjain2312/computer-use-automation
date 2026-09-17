@@ -55,7 +55,7 @@ Edit `.env`:
 | `MERIDIAN_OPERATOR_ID` | discovery + replay | Sign-on id for the mock console. Fixture value: `ops.demo`. |
 | `MERIDIAN_OPERATOR_PASSCODE` | discovery + replay | Read from the environment, never stored in artifacts, logs or evidence. Fixture value is in `.env.example`. |
 | `MERIDIAN_OVERRIDE_CODE` | the handoff demo | The supervisor override the operator applies. |
-| `MERIDIAN_BASE_URL` | optional | Defaults to `http://127.0.0.1:8799`. |
+| `MERIDIAN_BASE_URL` | optional | Defaults to `http://127.0.0.1:8799`. If you change it, add the new origin to `config/allowlist.yaml` — otherwise the safety gate will refuse the run, which is the intended behaviour. |
 
 No other services are required. `.env` is gitignored; `.env.example` contains
 only fixture values for the local mock app.
