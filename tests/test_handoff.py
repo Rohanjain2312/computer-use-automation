@@ -106,3 +106,125 @@ def test_console_serves_state_and_accepts_commands_without_touching_the_browser(
         assert "Take control" in page and "Release" in page
     finally:
         console.stop()
+
+
+# -- the operator console, without a browser -----------------------------
+
+
+class _FakeRecorder:
+    """Stands in for the in-page recorder; hands back actions once installed."""
+
+    def __init__(self, actions):
+        self.actor = "operator"
+        self.simulated = True
+        self.installed = False
+        self._pending = list(actions)
+
+    def install(self):
+        self.installed = True
+
+    def drain(self):
+        if not self.installed:
+            return []
+        out, self._pending = self._pending, []
+        return out
+
+
+class _FakeSurface:
+    def screenshot(self, **kw):
+        return b""
+
+
+class _FakeEvidence:
+    def screenshot(self, *a, **kw):
+        return None
+
+
+def _operator_fixtures(tmp_path, actions, commands):
+    from cua.observability.logging import RunLogger
+    from cua.safety.redact import Redactor
+
+    control = SessionControl(run_id="r1")
+    control.pause_for_human("entitlement block", "int_1", "s06")
+    console = OperatorConsole(control, port=0)
+    for c in commands:
+        console.commands.put(c)
+    recorder = _FakeRecorder(actions)
+    logger = RunLogger(tmp_path / "run.jsonl", run_id="r1", phase="replay",
+                       redactor=Redactor(), echo=False)
+    request = InterventionRequest(run_id="r1", capability_id="cap", goal="g",
+                                  step_id="s06", step_index=6, step_intent="run the inquiry",
+                                  reason="restricted")
+    return control, console, recorder, logger, request
+
+
+def test_console_operator_records_actions_taken_before_the_takeover_button(tmp_path):
+    """A person who fixes the problem first and presses the button after.
+
+    The recorder used to be installed by "Take control", so anything done before
+    pressing it vanished — and the run still succeeded, making the loss silent.
+    """
+    from cua.handoff.operators import ConsoleOperator
+
+    did = HumanAction(at="t", kind="click", description="clicked the 'Apply Override' button",
+                      actor="operator", simulated=False)
+    control, console, recorder, logger, request = _operator_fixtures(
+        tmp_path, [did], commands=["release"])
+
+    result = ConsoleOperator(console, poll_s=0.01).handle(
+        request, control=control, surface=_FakeSurface(), recorder=recorder,
+        logger=logger, evidence=_FakeEvidence())
+    logger.close()
+
+    assert recorder.installed, "the recorder must be live as soon as the session pauses"
+    assert result == "resumed"
+    assert [a.description for a in control.human_actions] == [did.description]
+    assert control.human_actions[0].simulated is False
+
+
+def test_console_operator_normal_order_still_transfers_control(tmp_path):
+    from cua.handoff.control import ControlOwner
+    from cua.handoff.operators import ConsoleOperator
+
+    did = HumanAction(at="t", kind="click", description="clicked the 'Apply Override' button",
+                      actor="operator", simulated=False)
+    control, console, recorder, logger, request = _operator_fixtures(
+        tmp_path, [did], commands=["take", "release"])
+
+    result = ConsoleOperator(console, poll_s=0.01).handle(
+        request, control=control, surface=_FakeSurface(), recorder=recorder,
+        logger=logger, evidence=_FakeEvidence())
+    logger.close()
+
+    assert result == "resumed"
+    kinds = [e.kind for e in control.history]
+    assert "control_granted" in kinds and "control_released" in kinds
+    assert control.owner is ControlOwner.automation
+    assert len(control.human_actions) == 1
+
+
+def test_console_operator_abort_stops_the_run(tmp_path):
+    from cua.handoff.operators import ConsoleOperator
+
+    control, console, recorder, logger, request = _operator_fixtures(
+        tmp_path, [], commands=["abort"])
+    result = ConsoleOperator(console, poll_s=0.01).handle(
+        request, control=control, surface=_FakeSurface(), recorder=recorder,
+        logger=logger, evidence=_FakeEvidence())
+    logger.close()
+    assert result == "aborted"
+    assert control.state is SessionState.aborted
+
+
+def test_console_page_states_the_required_order(tmp_path):
+    """The page must say to act in the automation's window, in order."""
+    control = SessionControl(run_id="r1")
+    console = OperatorConsole(control, port=0)
+    url = console.start()
+    try:
+        page = urllib.request.urlopen(url, timeout=5).read().decode()
+        assert "Take control" in page and "Release" in page
+        assert "What to do" in page
+        assert "browser window" in page
+    finally:
+        console.stop()

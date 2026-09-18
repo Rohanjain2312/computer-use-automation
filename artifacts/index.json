@@ -45,10 +45,10 @@
       ],
       "business_outcomes": [
         "member_not_found",
-        "access_restricted_executive_servic"
+        "executive_services_restricted"
       ],
       "path": "artifacts/member_savings_balance_lookup/v1.0.0.json",
-      "checksum": "sha256:7f89481669875a127b95e569893bb104b6a03f328201db2633627a7a042048a7"
+      "checksum": "sha256:357ab9f9b3fe75edb3e0715d3d12c7812d5d5f20e9cfd67f4fc328fc589dde93"
     }
   ]
 }

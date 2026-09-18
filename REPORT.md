@@ -276,9 +276,23 @@ report because their document was replaced mid-event. Password fields are never
 captured, at the source. Everything is redacted before it is written and lands
 in `ReplayResult.human_actions` and the run log.
 
-**What is mocked, precisely.** The operator *interface* is minimal but real. For
-headless evidence runs and CI there is a `ScriptedOperator` that drives the
-identical seam — it takes control, acts on the same live session, is recorded by
+The listeners go in the moment the session *pauses*, not when the operator
+presses *Take control*. That ordering was originally the other way round and it
+lost work: a person who sees the parked browser and fixes the problem before
+touching the console had their actions recorded nowhere, while the run still
+reported success. Silent loss of evidence is a worse failure than a loud one, so
+actions taken before the formal takeover are now recorded and flagged with
+`before_takeover`, and releasing without having taken control still resumes the
+run rather than leaving the operator stuck. The control *state machine* is
+unchanged — ownership still transfers explicitly — but the record now reflects
+what actually happened to the session rather than what the button sequence
+implied.
+
+**What is mocked, precisely.** The operator *interface* is minimal but real, and
+the repository contains a run of it performed by an actual person
+(`evidence/replay/replay_handoff_human_…04c40d/`, every action
+`"simulated": false`). For headless evidence runs and CI there is a
+`ScriptedOperator` that drives the identical seam — it takes control, acts on the same live session, is recorded by
 the same in-page listeners, and releases control through the same state machine
 — and every action it records is tagged `simulated: true`. A real human takeover
 runs via `./scripts/handoff_demo.sh` with `--headed --operator console`. What is

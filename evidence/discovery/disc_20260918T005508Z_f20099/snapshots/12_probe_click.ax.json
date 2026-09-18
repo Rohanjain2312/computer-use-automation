@@ -1,0 +1,301 @@
+{
+  "url": "http://127.0.0.1:8799/",
+  "title": "MeridianCore Servicing Console",
+  "captured_at": "2026-09-18T00:55:57.111Z",
+  "frames": [
+    {
+      "name": "navpane",
+      "path": "navpane",
+      "src": "/nav",
+      "url": "http://127.0.0.1:8799/nav",
+      "accessible": true,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 900
+      }
+    },
+    {
+      "name": "bodypane",
+      "path": "bodypane",
+      "src": "/content",
+      "url": "http://127.0.0.1:8799/members/search",
+      "accessible": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 900
+      }
+    }
+  ],
+  "text": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Inquiry\nNo member matching that number was found.\n\nSearched member number: 999999",
+  "nodes": [
+    {
+      "ref": "n0",
+      "role": "button",
+      "name": "Dashboard",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Dashboard",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 49,
+        "width": 186,
+        "height": 27.5
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Servicing v7.2.1"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n1",
+      "role": "button",
+      "name": "Member Servicing",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 76.5,
+        "width": 186,
+        "height": 27.5
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Dashboard"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n2",
+      "role": "button",
+      "name": "Card Services",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Card Services",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 104,
+        "width": 186,
+        "height": 27.5
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Member Servicing"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n3",
+      "role": "button",
+      "name": "Batch Posting",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Batch Posting",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 131.5,
+        "width": 186,
+        "height": 27.5
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Card Services"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n4",
+      "role": "button",
+      "name": "Sign Off",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Sign Off",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 159,
+        "width": 186,
+        "height": 27.5
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Batch Posting"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n5",
+      "role": "cell",
+      "name": "Member Servicing \u2014 Inquiry",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing \u2014 Inquiry",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 27.5
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Member Servicing \u2014 Inquiry",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n6",
+      "role": "cell",
+      "name": "No member matching that number was found. Searched member number: 999999",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "No member matching that number was found. Searched member number: 999999",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 201.5,
+        "y": 42,
+        "width": 519,
+        "height": 79
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "No member matching that number was found. Searched member number: 999999",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n7",
+      "role": "button",
+      "name": "New Search",
+      "name_source": "value-attr",
+      "value": "New Search",
+      "text": "",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 633.2,
+        "y": 129,
+        "width": 78.8,
+        "height": 20.5
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "No member matching that number was found. Searched member number: 999999"
+      ],
+      "label_left": "",
+      "label_above": "No member matching that number was found. Searched member number: 999999",
+      "table": {
+        "headers": [],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "input",
+        "css": "input",
+        "name_attr": "",
+        "id": ""
+      }
+    }
+  ]
+}

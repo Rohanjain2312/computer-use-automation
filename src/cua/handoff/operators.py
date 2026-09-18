@@ -144,33 +144,54 @@ class ConsoleOperator:
         logger: RunLogger,
         evidence: EvidenceWriter,
     ) -> str:
+        # Install the recorder before the operator is even told there is a problem.
+        #
+        # The obvious place to install it is on "Take control", and that is what
+        # this did originally. It loses work: a person who sees the paused browser
+        # and fixes the problem *before* pressing the button has their actions go
+        # completely unrecorded, and the run still succeeds — so the omission is
+        # silent. Recording from the moment the session pauses means the log
+        # reflects what actually happened to the session, whatever order the
+        # operator does things in.
+        recorder.actor = self.actor
+        recorder.simulated = False
+        recorder.install()
+
         self.console.publish(surface.screenshot(), request.as_dict())
         logger.log("operator_engaged", operator=self.name, intervention_id=request.id,
                    console_url=self.console.url)
         print("\n" + "=" * 74)
-        print(f"  HUMAN INTERVENTION REQUIRED  —  {self.console.url}")
+        print("  HUMAN INTERVENTION REQUIRED")
         for line in request.summary_lines():
             print("  " + line)
-        print("  Act in the browser window the automation is using, then Release & resume.")
+        print()
+        print(f"  1. Open the console:      {self.console.url}")
+        print("  2. Click 'Take control'   (the browser window is already open)")
+        print("  3. Do the steps above in that browser window")
+        print("  4. Click 'Release & resume'")
         print("=" * 74 + "\n", flush=True)
 
         deadline = time.time() + self.timeout_s
         while time.time() < deadline:
             command = self.console.poll_command()
             if command == "take" and control.owner is ControlOwner.automation:
+                self._collect(control, recorder, logger)
                 control.grant_human_control(self.actor)
-                recorder.actor = self.actor
-                recorder.simulated = False
-                recorder.install()
                 logger.log("control_transferred", owner=control.owner.value, actor=self.actor,
                            detail="human took control of the live session")
                 evidence.screenshot(surface.screenshot(), f"handoff_{request.id}_before_human")
-            elif command == "release" and control.owner is ControlOwner.human:
-                for action in recorder.drain():
-                    control.record_human_action(action)
-                    logger.log("human_action", detail=action.description, actor=action.actor)
+            elif command == "release":
+                self._collect(control, recorder, logger)
                 evidence.screenshot(surface.screenshot(), f"handoff_{request.id}_after_human")
-                control.release_to_automation("operator released control", self.actor)
+                if control.owner is ControlOwner.human:
+                    control.release_to_automation("operator released control", self.actor)
+                else:
+                    # The operator fixed it without formally taking control. The
+                    # work is real and is already recorded, so resume rather than
+                    # ignoring the button and leaving them stuck.
+                    logger.log("release_without_takeover", actor=self.actor,
+                               detail="operator released without taking control first; "
+                                      "their actions were still recorded")
                 logger.log("control_transferred", owner=control.owner.value, actor=self.actor,
                            detail="control returned to automation")
                 return "resumed"
@@ -179,14 +200,19 @@ class ConsoleOperator:
                 logger.log("run_aborted_by_operator", actor=self.actor)
                 return "aborted"
 
-            if control.owner is ControlOwner.human:
-                for action in recorder.drain():
-                    control.record_human_action(action)
-                    logger.log("human_action", detail=action.description, actor=action.actor)
-
+            self._collect(control, recorder, logger)
             self.console.publish(surface.screenshot(), request.as_dict())
             time.sleep(self.poll_s)
 
+        self._collect(control, recorder, logger)
         logger.log("operator_timeout", operator=self.name, intervention_id=request.id,
                    timeout_s=self.timeout_s)
         return "unavailable"
+
+    def _collect(self, control: SessionControl, recorder: HumanActionRecorder,
+                 logger: RunLogger) -> None:
+        """Drain whatever the person did, regardless of who formally holds control."""
+        for action in recorder.drain():
+            control.record_human_action(action)
+            logger.log("human_action", detail=action.description, actor=action.actor,
+                       before_takeover=control.owner is not ControlOwner.human)

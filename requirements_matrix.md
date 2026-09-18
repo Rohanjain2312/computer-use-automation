@@ -38,7 +38,7 @@ limit · **design** — the assignment asks for a design, not an implementation.
 | Requirement | Status | Implementation | Evidence / test |
 |---|---|---|---|
 | Replays from artifact + typed inputs | done | `replay/engine.py::ReplayEngine.run` | `evidence/replay/*happy*/result.json` |
-| No LLM decisions on the normal path | done | `replay/` imports no model client; `ReplayResult.llm_used = False` | `test_happy_path_returns_typed_outputs` |
+| No LLM decisions on the normal path | done | `replay/` imports no model client, directly or transitively; `ReplayResult.llm_used = False` | `test_happy_path_returns_typed_outputs`; `./scripts/prove_no_llm.sh` replays with every key, SDK and non-local socket removed, and shows the seals bite by failing discovery under them |
 | Stable targeting with fallbacks | done | `locate/strategies.py::resolve`, degradation recorded | `test_locator_falls_back_and_records_the_degradation` |
 | Checkpoint verification | done | `_run_step` → `checkpoints.evaluate` | `evidence/replay/*/run.jsonl` (`checkpoint` events) |
 | Returns declared outputs | done | `_extract_outputs` with typed coercion | `evidence/replay/*happy*/result.json` |
@@ -87,8 +87,8 @@ limit · **design** — the assignment asks for a design, not an implementation.
 | Intervention request with context | done | `handoff/intervention.py` — goal, step, reason, screenshot, DOM, suggested actions | `test_intervention_request_carries_what_a_human_needs` |
 | Automation pauses | done | `SessionControl.pause_for_human`; `assert_can_act` blocks automation | `test_automation_cannot_act_while_a_human_holds_control` |
 | Human controls the SAME live session | done | same `BrowserContext`/page throughout; console is control-plane only | `handoff/console.py`, `scripts/handoff_demo.sh` |
-| Human can act | done (scoped) | real: headed browser + console. Headless/CI: `ScriptedOperator`, tagged `simulated` | `test_permission_denied_escalates_and_resumes_on_the_same_session` |
-| Human actions recorded | done | `handoff/recorder.js` capture-phase listeners + frame-URL diffing | same test asserts the recorded descriptions |
+| Human can act | done | Performed by a real person via headed browser + console; `ScriptedOperator` covers headless/CI, tagged `simulated` | `evidence/replay/replay_handoff_human_…04c40d/` (`"simulated": false`); `test_permission_denied_escalates_and_resumes_on_the_same_session` |
+| Human actions recorded | done | `handoff/recorder.js` capture-phase listeners + frame-URL diffing, installed from the moment the session pauses | `test_console_operator_records_actions_taken_before_the_takeover_button`, `test_console_operator_normal_order_still_transfers_control` |
 | Control returns; run resumes | done | `release_to_automation` → `resumed`; step re-verified before being repeated | same test asserts the control-event order |
 | Control ownership explicit | done | `SessionControl.owner` / `state`, full history in every result | `ReplayResult.control_log` |
 

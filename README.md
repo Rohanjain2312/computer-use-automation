@@ -25,8 +25,9 @@ deliberately hostile, because that is what the real systems look like.
   error handling, heterogeneity and multi-tenancy, escalation, safety, cuts.
 - **[DECISIONS.md](DECISIONS.md)** — the open-ended choices, the alternatives
   considered, and what each one costs.
-- **[evidence/README.md](evidence/README.md)** — the real discovery run and
-  seven replay runs, annotated.
+- **[evidence/README.md](evidence/README.md)** — the real discovery run, six
+  deterministic replays, and a human takeover performed by an actual person,
+  annotated.
 - **[requirements_matrix.md](requirements_matrix.md)** — every requirement, where
   it lives, what proves it.
 
@@ -148,25 +149,100 @@ is also model-free:
 ./scripts/test.sh
 ```
 
- tests: schema and validation, templating and typed coercion, locator
-resolution and candidate generation, predicate evaluation, the safety gate and
-redactor, the control state machine, synthesis, the catalog, and ten
-browser-backed end-to-end replays covering every runtime-condition category.
+117 tests, none of which call a model: schema and validation, templating and
+typed coercion, locator resolution and candidate generation, predicate
+evaluation, the safety gate and redactor, the control state machine and operator
+console, synthesis, the catalog, and ten browser-backed end-to-end replays
+covering every runtime-condition category.
+
+### Verifying that replay really uses no model
+
+The claim that production replay has no LLM in the decision loop is the whole
+point of the design, so it is made falsifiable rather than asserted:
+
+```bash
+./scripts/prove_no_llm.sh
+```
+
+It runs a real replay inside a process with three seals — every `*_API_KEY`
+stripped from the environment, the model SDKs made unimportable, and outbound
+sockets blocked to everything except `127.0.0.1` — and the replay completes
+anyway.
+
+Then it runs the control experiment, which matters just as much: **discovery**
+under the identical seals, which must fail. A test that cannot fail proves
+nothing, so the seals are shown to bite before the replay result is believed.
+
+It finishes by checking that no replay run has ever written a `model_trace.jsonl`
+— discovery writes one with an entry per model call; replay has no such file,
+because there is nothing to trace.
+
+The underlying reason is structural: nothing under `src/cua/replay/` imports a
+model client, directly or transitively. Replay reads the saved artifact — which
+control to find, how long to wait, what text proves the step worked — and
+follows it.
 
 ---
 
 ## Human-in-the-loop with a real person
 
+This is the one part of the demo you drive yourself. It takes about a minute.
+
 ```bash
 ./scripts/handoff_demo.sh
 ```
 
-A headed browser opens and the run pauses on the entitlement block. The console
-URL is printed. Open it, click **Take control**, perform the supervisor override
-yourself **in the browser window the automation is driving** (the code is in
-`.env`), then click **Release & resume**. Automation re-verifies the step,
-finds the human already got it there, and finishes the run. Your actions are
-recorded and appear in the result.
+**Two windows open.** A Chromium window — that is the live session the
+automation is driving — and an operator console at **http://127.0.0.1:8811**.
+The terminal prints the console URL as it starts; if that port is busy it picks
+another and tells you which.
+
+The run signs on, searches for member `100999`, and stops: that member is
+entitlement-restricted. The console shows why, and the browser window is parked
+on the "Access Restricted" screen.
+
+**Then you do this:**
+
+| | Where | What |
+|---|---|---|
+| 1 | Console | Click **Take control**. |
+| 2 | **Chromium window** | Click **Supervisor Override**. |
+| 3 | **Chromium window** | Type the override code into **Override Code**, then click **Apply Override**. |
+| 4 | Console | Click **Release & resume**. |
+
+The override code is `MERIDIAN_OVERRIDE_CODE` in your `.env` (`OVR-4417` by
+default).
+
+**What happens next.** Automation takes the session back, re-checks the step it
+was blocked on, finds you already got the screen there, and finishes — returning
+the balance for a member it could not reach on its own. Your clicks appear in
+the result as recorded human actions.
+
+### Things that trip people up
+
+- **Act in the Chromium window, not the console.** The console is a control
+  panel; it shows a screenshot, not a live page. Clicking the screenshot does
+  nothing.
+- **Don't open a new tab or a second browser.** The whole point is that you and
+  the automation share one session. A new tab is a different session and will not
+  be signed in.
+- **Order doesn't have to be perfect.** If you fix the problem before pressing
+  *Take control*, your actions are still recorded and *Release & resume* still
+  works — the recorder is live from the moment the run pauses.
+- **Taking your time is fine.** The run waits up to 15 minutes; there is no
+  penalty for a slow first attempt.
+
+### Prefer to watch it without driving?
+
+The same path runs unattended with a scripted stand-in operator, headless and in
+about ten seconds:
+
+```bash
+.venv/bin/cua replay -c member_savings_balance_lookup -i member_id=100999 --operator scripted
+```
+
+It uses the identical control-transfer machinery and its recorded actions are
+tagged `"simulated": true`, so the evidence never overstates what happened.
 
 ---
 
@@ -182,6 +258,7 @@ recorded and appear in the result.
 | `cua catalog list` / `catalog tools` / `catalog show <id>` | What an agent can call, and its tool schema. |
 | `cua validate [artifact]` | Structure, safety and provenance checks. |
 | `cua inject none\|app_error\|slow\|expire` | Fault injection on the mock app. Operator tooling — the allowlist denies the agent this route. |
+| `./scripts/prove_no_llm.sh` | Run a replay sealed off from every model SDK, key and network, plus the control experiment. |
 
 ---
 

@@ -40,7 +40,11 @@ _PAGE = """<!doctype html><html><head><meta charset="utf-8">
  .human{background:#7a5c17}.auto{background:#1f4a6f}
  pre{white-space:pre-wrap;color:#b9c6da;background:#151b25;padding:10px;border-radius:5px;
    max-height:190px;overflow:auto;font-size:12px}
- li{margin-bottom:3px}
+ li{margin-bottom:5px}
+ .steps{background:#151b25;border:1px solid #2b3648;border-radius:5px;padding:8px 12px;margin:12px 0}
+ .steps ol{margin:6px 0 2px;padding-left:20px}
+ .steps li.now{color:#ffd479;font-weight:600}
+ .steps li.done{color:#6f7f96;text-decoration:line-through}
 </style></head><body>
 <header><h1>Computer-Use Automation &mdash; Operator Console</h1></header>
 <main>
@@ -59,12 +63,26 @@ async function tick(){
     <div><span class="k">Goal</span> ${s.request.goal||'-'}</div>
     <div><span class="k">Step</span> ${s.request.step_index ?? '-'} ${s.request.step_id||''} — ${s.request.step_intent||''}</div>
     <div><span class="k">Reason</span> ${s.request.reason||'-'}</div>
+    <div><span class="k">Act in</span> the browser window automation opened (not this page)</div>
     <div><span class="k">At</span> ${s.request.observed_url||'-'}</div>
     <div style="margin:10px 0 6px"><b>Suggested manual steps</b></div>
     <ul>${(s.request.suggested_actions||[]).map(a=>`<li>${a}</li>`).join('')}</ul>
+    <div class="steps">
+      <b>What to do</b>
+      <ol>
+        <li class="${o==='human'?'done':'now'}">Click <b>Take control</b> below.</li>
+        <li class="${o==='human'?'now':''}">Do the steps above <b>in the browser window the
+            automation already has open</b> &mdash; not a new tab.</li>
+        <li>Click <b>Release &amp; resume</b>. Automation carries on from where it paused.</li>
+      </ol>
+    </div>
     <div style="margin:12px 0">
-      <button class="primary" onclick="cmd('take')" ${o==='human'?'disabled':''}>Take control</button>
-      <button class="primary" onclick="cmd('release')" ${o==='human'?'':'disabled'}>Release &amp; resume</button>
+      <button class="primary" onclick="cmd('take')" ${o==='human'?'disabled':''}
+        title="${o==='human'?'You already have control':'Take control of the live session'}">
+        Take control</button>
+      <button class="primary" onclick="cmd('release')"
+        title="${o==='human'?'Hand the session back to automation':'Do this after you have finished in the browser window'}">
+        Release &amp; resume</button>
       <button class="danger" onclick="cmd('abort')">Abort run</button>
     </div>
     <div><b>Recorded human actions (${s.control.human_actions.length})</b></div>

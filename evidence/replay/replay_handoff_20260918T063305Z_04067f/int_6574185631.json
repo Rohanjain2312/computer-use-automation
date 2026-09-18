@@ -1,0 +1,28 @@
+{
+  "id": "int_6574185631",
+  "created_at": "2026-09-18T06:33:13Z",
+  "run_id": "replay_handoff_20260918T063305Z_04067f",
+  "phase": "replay",
+  "capability_id": "member_savings_balance_lookup",
+  "capability_version": "1.0.0",
+  "goal": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.",
+  "step_id": "s06_search_member_s_account_summary",
+  "step_index": 6,
+  "step_intent": "Search for the member's account summary",
+  "reason_class": "business_outcome:executive_services_restricted",
+  "reason": "Member the requested record is flagged EXECUTIVE SERVICES. A supervisor override is required to continue. A supervisor can clear this block on the same session via the 'Supervisor Override' button.",
+  "observed_url": "http://127.0.0.1:8799/",
+  "observed_title": "MeridianCore Servicing Console",
+  "observed_excerpt": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Inquiry\nAccess Restricted\nYou do not have permission to view this member.\n\nMember 100999 is flagged EXECUTIVE SERVICES. A supervisor override is required to continue.",
+  "screenshot_path": "evidence/replay/replay_handoff_20260918T063305Z_04067f/screens/008_intervention_s06_search_member_s_account_summary.png",
+  "dom_snapshot_path": "evidence/replay/replay_handoff_20260918T063305Z_04067f/snapshots/intervention_s06_search_member_s_account_summary.dom.html",
+  "suggested_actions": [
+    "Have a supervisor click 'Supervisor Override' on this same session to clear the restriction and continue the lookup.",
+    "Then press Release & resume"
+  ],
+  "resume_hint": "automation will retry step 's06_search_member_s_account_summary' (Search for the member's account summary) after release",
+  "status": "resolved",
+  "resolution": "resumed",
+  "resolved_at": null,
+  "operator": "scripted-operator"
+}

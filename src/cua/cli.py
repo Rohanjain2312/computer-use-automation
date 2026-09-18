@@ -81,8 +81,16 @@ def _make_operator(mode: str, control: SessionControl, script: list[dict] | None
     if mode == "scripted":
         return ScriptedOperator(script or OVERRIDE_SCRIPT), None
     console = OperatorConsole(control, port=console_port)
-    console.start()
-    typer.secho(f"  operator console: {console.url}", fg=typer.colors.CYAN)
+    try:
+        console.start()
+    except OSError:
+        # A leftover console, or anything else on that port, should not sink the
+        # run the operator is standing in front of. Take any free port and say so.
+        console = OperatorConsole(control, port=0)
+        console.start()
+        typer.secho(f"  port {console_port} was busy; using {console.port} instead",
+                    fg=typer.colors.YELLOW)
+    typer.secho(f"  operator console: {console.url}", fg=typer.colors.CYAN, bold=True)
     return ConsoleOperator(console), console
 
 

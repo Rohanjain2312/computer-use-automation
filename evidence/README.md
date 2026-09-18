@@ -3,7 +3,7 @@
 Everything here was produced by running the system, not by hand. Paths are
 exactly as the tools wrote them.
 
-Everything here came from a single `./scripts/demo.sh` run. Reproduce it with that command (needs `ANTHROPIC_API_KEY`), or
+Everything here was produced by running the system. Reproduce the machine-driven parts with `./scripts/demo.sh` (needs `ANTHROPIC_API_KEY`), or
 everything except the discovery run with `./scripts/replay.sh` (needs no model
 access, because replay never uses one).
 
@@ -28,12 +28,12 @@ Redaction on the way out, stated precisely:
 
 ## 1. The real discovery run
 
-`discovery/disc_20260918T002641Z_055394/`
+`discovery/disc_20260918T005508Z_f20099/`
 
 | | |
 |---|---|
 | Model | `claude-sonnet-5`, 22 calls |
-| Tokens | 359,630 in / 4,666 out |
+| Tokens | 358,668 in / 4,467 out |
 | Goal-phase actions | 7 |
 | Probe-phase actions | 9 |
 | Screenshots | 38 |
@@ -99,13 +99,14 @@ No model is consulted in any of these — `result.json` records `llm_used: false
 
 | Run | Input | Status | What it demonstrates |
 |---|---|---|---|
-| `replay_smoke_…164f07` | `100244` | `success` | The smoke replay `cua discover` runs to promote the artifact draft → approved. Its run id is recorded in the artifact's `verification`. |
-| `replay_happy_…942764` | `100731` | `success` | The same artifact on a **different member** — returns `129.05` for a member the recording never saw. The flow is parameterized, not a transcript. |
-| `replay_not_found_…1b590d` | `999999` | `business_outcome` | Category A. `outcome.name = member_not_found`, no failure object. The caller is told the answer; nothing is broken. |
-| `replay_bad_input_…8cd561` | `oops` | `invalid_input` | The caller's argument failed its declared pattern. Rejected in 1 ms, `steps: []` — the application was never touched. |
-| `replay_app_error_…c90706` | `100244` + injected fault | `failure` | Category C. `error_class: host_system_error`, the failed step id, expected vs observed, plus a screenshot, an AX snapshot and a DOM snapshot. |
-| `replay_handoff_…18987d` | `100999` | `success` | Category A → escalation → same-session human takeover → resume → success. Detailed below. |
-| `replay_invoke_…0ad3fc` | `100244` | `success` | Invoked by capability name the way an AI agent would, returning typed JSON. |
+| `replay_smoke_…b85f4f` | `100244` | `success` | The smoke replay `cua discover` runs to promote the artifact draft → approved. Its run id is recorded in the artifact's `verification`. |
+| `replay_happy_…163874` | `100731` | `success` | The same artifact on a **different member** — returns `129.05` for a member the recording never saw. The flow is parameterized, not a transcript. |
+| `replay_not_found_…1f05b3` | `999999` | `business_outcome` | Category A. `outcome.name = member_not_found`, no failure object. The caller is told the answer; nothing is broken. |
+| `replay_bad_input_…c85ab8` | `oops` | `invalid_input` | The caller's argument failed its declared pattern. Rejected in 1 ms, `steps: []` — the application was never touched. |
+| `replay_app_error_…96c5c4` | `100244` + injected fault | `failure` | Category C. `error_class: host_system_fault`, the failed step id, expected vs observed, plus a screenshot, an AX snapshot and a DOM snapshot. |
+| `replay_handoff_…04067f` | `100999` | `success` | Category A → escalation → same-session human takeover → resume → success. Detailed below. |
+| `replay_invoke_…d6f3ac` | `100244` | `success` | Invoked by capability name the way an AI agent would, returning typed JSON. |
+| `replay_handoff_human_…04c40d` | `100999` | `success` | **The same handoff, performed by an actual person** — not the scripted stand-in. Every recorded action carries `"simulated": false` and `"actor": "operator"`. |
 
 Every successful run also shows **Category B** in its `recoveries`: the
 maintenance interstitial is cleared by a recovery rule, not by a recorded step,
@@ -113,7 +114,7 @@ which is why it works regardless of when the screen appears.
 
 ### The handoff run in detail
 
-`replay_handoff_20260918T002846Z_18987d/result.json`
+`replay_handoff_20260918T063305Z_04067f/result.json`
 
 Member 100999 is entitlement-restricted. The artifact declares that as a
 business outcome with `disposition: escalate_to_human` — a real answer a person
@@ -151,7 +152,34 @@ written. An end-to-end test asserts this.
 that the handoff is reproducible headlessly and in CI. It is not a shortcut
 around the seam: it takes control through the same state machine, acts on the
 same live session, and is recorded by the same in-page listeners. Every action
-it records is tagged `"simulated": true`, so this evidence never overstates
-what happened. For a real person, run `./scripts/handoff_demo.sh`, which uses
-`--headed --operator console`: the run pauses, you take control in the browser
-window the automation is driving, do the override yourself, and release.
+it records is tagged `"simulated": true`, so this evidence never overstates what
+happened.
+
+### The same handoff, done by a person
+
+`replay_handoff_human_20260918T062237Z_04c40d/result.json`
+
+Produced by `./scripts/handoff_demo.sh`: a headed browser, the operator console,
+and a human doing the supervisor override by hand. It is the same flow as the
+run above, with nothing simulated:
+
+```json
+{ "kind": "click",
+  "description": "clicked the 'Apply Override' button",
+  "actor": "operator",
+  "simulated": false }
+```
+
+Six actions recorded, 64 seconds, `status: success`, returning the restricted
+member's balance. The `control_log` shows the same ordering the scripted run
+produces — `automation_paused → control_granted → control_released →
+automation_resumed` — which is the point: the seam does not care who is on the
+other end of it.
+
+**A gap this run exposed.** An earlier attempt succeeded but recorded *zero*
+human actions. The operator had fixed the problem in the browser window before
+pressing *Take control*, and the recorder was only installed by that button —
+so real work went unrecorded while the run still reported success. Silent loss
+of evidence is worse than a loud failure, so the recorder is now installed the
+moment the session pauses, and actions taken before the formal takeover are
+recorded and flagged. `tests/test_handoff.py` covers both orderings.

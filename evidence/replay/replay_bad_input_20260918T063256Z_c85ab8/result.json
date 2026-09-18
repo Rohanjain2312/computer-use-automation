@@ -1,0 +1,52 @@
+{
+  "run_id": "replay_bad_input_20260918T063256Z_c85ab8",
+  "capability_id": "member_savings_balance_lookup",
+  "capability_version": "1.0.0",
+  "status": "invalid_input",
+  "started_at": "2026-09-18T06:32:56.695Z",
+  "finished_at": "2026-09-18T06:32:56.696Z",
+  "duration_ms": 1,
+  "inputs_echo": {},
+  "outputs": {},
+  "outcome": null,
+  "failure": {
+    "error_class": "invalid_input",
+    "message": "input 'member_id' value does not match the declared pattern '[0-9]{6}'",
+    "step_id": null,
+    "step_index": null,
+    "step_intent": "",
+    "expected": "inputs matching the declared contract",
+    "observed": "caller arguments rejected before touching the application",
+    "observed_url": "",
+    "locator_attempts": [],
+    "recovery_attempts": [],
+    "evidence": []
+  },
+  "steps": [],
+  "recoveries": [],
+  "escalations": [],
+  "control_log": [
+    {
+      "at": "2026-09-18T06:32:56.363Z",
+      "kind": "session_opened",
+      "from_owner": null,
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run started",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-18T06:32:56.697Z",
+      "kind": "session_closed",
+      "from_owner": "automation",
+      "to_owner": null,
+      "state": "completed",
+      "reason": "run ended: invalid_input",
+      "actor": "system"
+    }
+  ],
+  "human_actions": [],
+  "llm_used": false,
+  "evidence_dir": "evidence/replay/replay_bad_input_20260918T063256Z_c85ab8",
+  "log_path": "evidence/replay/replay_bad_input_20260918T063256Z_c85ab8/run.jsonl"
+}
