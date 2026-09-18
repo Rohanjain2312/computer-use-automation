@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "member_savings_balance_lookup",
-      "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.\n\nReturns on success: current_savings_balance (decimal), savings_account_status (string), member_name (string).\nMay instead return status='business_outcome' with one of: member_not_found, member_access_restricted.\nSurface: Meridian Systems MeridianCore Servicing. Artifact status: approved, version 1.0.0.",
+      "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.\n\nReturns on success: current_savings_balance (decimal), savings_account_status (string), member_name (string).\nMay instead return status='business_outcome' with one of: member_not_found, access_restricted_executive_servic.\nSurface: Meridian Systems MeridianCore Servicing. Artifact status: approved, version 1.0.0.",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -41,11 +41,11 @@
           "properties": {
             "current_savings_balance": {
               "type": "string",
-              "description": "Current Balance shown for the Regular Savings account"
+              "description": "Current Balance for the Regular Savings account"
             },
             "savings_account_status": {
               "type": "string",
-              "description": "Status shown for the Regular Savings account row"
+              "description": "Status for the Regular Savings account"
             },
             "member_name": {
               "type": "string",
@@ -60,7 +60,7 @@
               "type": "string",
               "enum": [
                 "member_not_found",
-                "member_access_restricted"
+                "access_restricted_executive_servic"
               ]
             },
             "message": {

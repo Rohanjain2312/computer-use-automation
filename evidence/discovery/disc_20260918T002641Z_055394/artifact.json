@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Member savings balance lookup",
   "description": "Look up a credit-union member in the MeridianCore servicing console and return the current balance and status of their Regular Savings account.",
-  "status": "approved",
+  "status": "draft",
   "surface": {
     "kind": "web",
     "entry_point": "{{ config.base_url }}/",
@@ -1037,9 +1037,9 @@
     "notes": "dropped the step that dismissed the interstitial ('Dismiss the system notice to proceed to Member Servicing'); it is covered by a recovery rule, which fires whenever the screen appears"
   },
   "verification": {
-    "smoke_replay_run_id": "replay_smoke_20260918T002810Z_164f07",
-    "smoke_replay_status": "success",
-    "verified_at": "2026-09-18T00:28:19Z"
+    "smoke_replay_run_id": null,
+    "smoke_replay_status": null,
+    "verified_at": null
   },
-  "checksum": "sha256:7f89481669875a127b95e569893bb104b6a03f328201db2633627a7a042048a7"
+  "checksum": "sha256:ad4c7fcc395b49c945afab4d[REDACTED]:accounta249e4803b900aeb3203a53846c708"
 }

@@ -46,4 +46,7 @@ echo
 echo "==> capabilities an AI agent can now call"
 $CUA catalog list
 echo
+echo "==> invoked the way an agent would: by name, typed in, typed out"
+$CUA invoke member_savings_balance_lookup -i member_id=100244 --base-url "$BASE"
+echo
 echo "evidence written under evidence/"
