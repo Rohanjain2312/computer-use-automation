@@ -201,6 +201,20 @@ class ConsoleOperator:
                 return "aborted"
 
             self._collect(control, recorder, logger)
+
+            if not surface.is_alive():
+                # Closing the browser window ends the session the whole handoff
+                # is built around. Say so here, while the operator is still
+                # looking, instead of failing on the next automated action.
+                logger.log("session_closed_during_handoff", actor=self.actor,
+                           intervention_id=request.id,
+                           detail="the live browser window was closed; the session that "
+                                  "automation and the operator share no longer exists")
+                print("\n  The browser window was closed, so the shared session is gone.")
+                print("  Re-run the demo and use 'Release & resume' instead of closing it.\n",
+                      flush=True)
+                return "session_closed"
+
             self.console.publish(surface.screenshot(), request.as_dict())
             time.sleep(self.poll_s)
 

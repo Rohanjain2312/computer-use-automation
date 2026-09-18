@@ -149,7 +149,7 @@ is also model-free:
 ./scripts/test.sh
 ```
 
-117 tests, none of which call a model: schema and validation, templating and
+119 tests, none of which call a model: schema and validation, templating and
 typed coercion, locator resolution and candidate generation, predicate
 evaluation, the safety gate and redactor, the control state machine and operator
 console, synthesis, the catalog, and ten browser-backed end-to-end replays
@@ -231,6 +231,9 @@ the result as recorded human actions.
   works — the recorder is live from the moment the run pauses.
 - **Taking your time is fine.** The run waits up to 15 minutes; there is no
   penalty for a slow first attempt.
+- **Don't close the Chromium window.** That window *is* the shared session, so
+  closing it ends the run. You will get a clear `session_closed` failure rather
+  than a confusing crash, but the run is over — use *Release & resume* instead.
 
 ### Prefer to watch it without driving?
 

@@ -14,6 +14,7 @@ screenshot the run loop published. All browser work stays on the run thread.
 
 from __future__ import annotations
 
+import base64
 import json
 import queue
 import threading
@@ -31,7 +32,8 @@ _PAGE = """<!doctype html><html><head><meta charset="utf-8">
  main{display:flex;gap:16px;padding:16px;align-items:flex-start;flex-wrap:wrap}
  .panel{background:#1b2330;border:1px solid #2b3648;border-radius:6px;padding:14px;min-width:330px;max-width:460px}
  .k{color:#8fa3bf;display:inline-block;min-width:92px}
- img{border:1px solid #2b3648;border-radius:6px;max-width:760px;width:100%}
+ img{border:1px solid #2b3648;border-radius:6px;max-width:760px;width:100%;
+   min-height:120px;background:#151b25}
  button{font:600 13px system-ui;padding:8px 14px;border-radius:5px;border:1px solid #3a4a63;
    background:#27354a;color:#e6eaf2;cursor:pointer;margin-right:8px}
  button.primary{background:#2f6f4f;border-color:#3d8a63}
@@ -94,6 +96,13 @@ tick(); setInterval(tick, 1200);
 </script></body></html>"""
 
 
+# 1x1 transparent PNG: shown until the first real screenshot is published, so the
+# pane reads as "nothing yet" rather than as a broken image.
+_PLACEHOLDER_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+)
+
+
 class OperatorConsole:
     def __init__(self, control: SessionControl, *, host: str = "127.0.0.1", port: int = 8811) -> None:
         self.control = control
@@ -101,7 +110,7 @@ class OperatorConsole:
         self.port = port
         self.commands: queue.Queue[str] = queue.Queue()
         self._lock = threading.Lock()
-        self._png: bytes = b""
+        self._png: bytes = _PLACEHOLDER_PNG
         self._request: dict[str, Any] = {}
         self._server: ThreadingHTTPServer | None = None
         self._thread: threading.Thread | None = None

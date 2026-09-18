@@ -166,5 +166,14 @@ class Surface(ABC):
     @abstractmethod
     def screenshot(self, *, mask: list[Rect] | None = None) -> bytes: ...
 
+    def is_alive(self) -> bool:
+        """Is the session still usable?
+
+        Not abstract: a surface that cannot lose its session inherits ``True``.
+        A browser can — the operator can close the window mid-handoff — and the
+        engine needs to say so plainly rather than failing on the next action.
+        """
+        return True
+
     @abstractmethod
     def close(self) -> None: ...

@@ -65,6 +65,11 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
+def _is_session_closed(exc: BaseException) -> bool:
+    text = f"{type(exc).__name__}: {exc}"
+    return "TargetClosed" in text or "has been closed" in text or "Browser closed" in text
+
+
 class Operator(Protocol):
     """Whoever answers an intervention request. Human or scripted stand-in."""
 
@@ -172,10 +177,19 @@ class ReplayEngine:
             else:
                 self.control.complete(f"run ended: {result.status.value}")
         except Exception as exc:  # unexpected: still returns a structured failure
+            closed = _is_session_closed(exc) or not self.surface.is_alive()
             failure = FailureDetail(
-                error_class="internal_error",
-                message=f"{type(exc).__name__}: {exc}",
-                evidence=self._capture_failure_evidence("internal_error"),
+                error_class="session_closed" if closed else "internal_error",
+                message=(
+                    "the live session was closed before the run could finish; during a "
+                    "handoff this usually means the browser window was closed instead of "
+                    "control being released from the operator console"
+                    if closed else f"{type(exc).__name__}: {exc}"
+                ),
+                expected="the live session to stay open until the run completed",
+                observed=f"{type(exc).__name__}: {str(exc).splitlines()[0][:160]}",
+                evidence=self._capture_failure_evidence(
+                    "session_closed" if closed else "internal_error"),
             )
             result = self._result(ReplayStatus.failure, started, t0, failure=failure)
             self.control.fail(str(exc))

@@ -306,6 +306,12 @@ class PlaywrightWebSurface(Surface):
                 except Exception:
                     pass
 
+    def is_alive(self) -> bool:
+        try:
+            return self._page is not None and not self._page.is_closed()
+        except Exception:
+            return False
+
     def dom_snapshot(self) -> str:
         """Richer failure signal: the rendered markup of every reachable frame."""
         parts: list[str] = []

@@ -134,6 +134,9 @@ class _FakeSurface:
     def screenshot(self, **kw):
         return b""
 
+    def is_alive(self):
+        return True
+
 
 class _FakeEvidence:
     def screenshot(self, *a, **kw):
@@ -228,3 +231,33 @@ def test_console_page_states_the_required_order(tmp_path):
         assert "browser window" in page
     finally:
         console.stop()
+
+
+def test_closing_the_window_mid_handoff_is_reported_as_a_closed_session(tmp_path):
+    """Closing the browser ends the shared session; say that, not TargetClosedError."""
+    from cua.handoff.operators import ConsoleOperator
+
+    class _DeadSurface(_FakeSurface):
+        def is_alive(self):
+            return False
+
+    control, console, recorder, logger, request = _operator_fixtures(
+        tmp_path, [], commands=[])
+    result = ConsoleOperator(console, poll_s=0.01, timeout_s=2).handle(
+        request, control=control, surface=_DeadSurface(), recorder=recorder,
+        logger=logger, evidence=_FakeEvidence())
+    logger.close()
+    assert result == "session_closed"
+    assert any(e["event"] == "session_closed_during_handoff" for e in logger.events)
+
+
+def test_a_closed_session_error_is_classified_not_swallowed():
+    from cua.replay.engine import _is_session_closed
+
+    class TargetClosedError(Exception):
+        pass
+
+    assert _is_session_closed(TargetClosedError("Page.wait_for_timeout: Target page, "
+                                                "context or browser has been closed"))
+    assert _is_session_closed(RuntimeError("Browser closed unexpectedly"))
+    assert not _is_session_closed(ValueError("member_id must be numeric"))
