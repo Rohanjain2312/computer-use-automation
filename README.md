@@ -33,80 +33,161 @@ deliberately hostile, because that is what the real systems look like.
 
 ---
 
-## Setup
+## Quickstart — 2 minutes, no API key needed
+
+The recorded capability is committed, so you can run the production path
+immediately. Nothing here calls a model.
+
+```bash
+./scripts/setup.sh
+```
+```bash
+./scripts/replay.sh
+```
+
+`setup.sh` creates the virtualenv, installs the package and downloads Chromium
+(~1 min, mostly the browser download). `replay.sh` starts the mock application
+and runs five paths in about 40 seconds. You should see exactly this:
+
+```text
+==> happy path
+[success] … current_savings_balance=4812.37, savings_account_status=OPEN, member_name=Dana Whitfield
+==> business outcome
+[business_outcome] … member_not_found: The searched member number does not exist …
+==> invalid input
+[invalid_input] … input 'member_id' value does not match the declared pattern '[0-9]{6}'
+==> injected failure
+[failure] … host_system_fault at step s06_search_member_s_account_summary …
+==> human handoff
+[success] … current_savings_balance=27640.18, savings_account_status=OPEN, member_name=Priya Raghunathan
+```
+
+Five different statuses, one artifact. That is the whole argument of the project
+in one command. Each run writes to `evidence/replay/<run_id>/` — `result.json`
+is the structured result, `run.jsonl` is the step-by-step log, `screens/` is
+what the machine saw.
+
+Then, if you want:
+
+```bash
+./scripts/test.sh
+```
+
+119 tests in about 75 seconds, none of which call a model: schema and
+validation, templating and typed coercion, locator resolution and candidate
+generation, predicate evaluation, the safety gate and redactor, the control
+state machine and operator console, synthesis, the catalog, and ten
+browser-backed end-to-end replays covering every runtime-condition category.
+
+---
+
+## Setup, in detail
 
 Requires **Python 3.11+** and [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
-One command:
 
 ```bash
 ./scripts/setup.sh
 ```
 
-That creates `.venv`, installs the package, downloads Chromium for Playwright,
-and copies `.env.example` to `.env`.
+It creates `.venv`, installs the package, downloads Chromium for Playwright, and
+copies `.env.example` to `.env`.
 
-### Configuration
-
-Edit `.env`:
+**You do not need to edit anything to run the quickstart.** `.env.example`
+already contains working fixture values for the local mock application. The only
+variable you must supply yourself is `ANTHROPIC_API_KEY`, and only if you want
+to run discovery.
 
 | Variable | Needed for | Notes |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | `cua discover` only | Replay, tests and the catalog never call a model. |
+| `ANTHROPIC_API_KEY` | `cua discover` only | Supply your own. Replay, tests and the catalog never call a model. |
 | `CUA_MODEL` | optional | Defaults to `claude-sonnet-5`. |
-| `MERIDIAN_OPERATOR_ID` | discovery + replay | Sign-on id for the mock console. Fixture value: `ops.demo`. |
-| `MERIDIAN_OPERATOR_PASSCODE` | discovery + replay | Read from the environment, never stored in artifacts, logs or evidence. Fixture value is in `.env.example`. |
-| `MERIDIAN_OVERRIDE_CODE` | the handoff demo | The supervisor override the operator applies. |
-| `MERIDIAN_BASE_URL` | optional | Defaults to `http://127.0.0.1:8799`. If you change it, add the new origin to `config/allowlist.yaml` — otherwise the safety gate will refuse the run, which is the intended behaviour. |
+| `MERIDIAN_OPERATOR_ID` | discovery + replay | Sign-on id for the mock console. Ships as `ops.demo`. |
+| `MERIDIAN_OPERATOR_PASSCODE` | discovery + replay | Read from the environment, never stored in artifacts, logs or evidence. Ships with a fixture value. |
+| `MERIDIAN_OVERRIDE_CODE` | the handoff demo | The supervisor override. Ships as `OVR-4417`. |
+| `MERIDIAN_BASE_URL` | optional | Defaults to `http://127.0.0.1:8799`. If you change it, add the new origin to `config/allowlist.yaml` — otherwise the safety gate refuses the run, which is the intended behaviour. |
 
-No other services are required. `.env` is gitignored; `.env.example` contains
-only fixture values for the local mock app.
+`.env` is gitignored. `.env.example` contains only fixture values for the local
+mock app; there are no real credentials anywhere in this repository.
 
 ---
 
-## Demo path
+## The full demo, including discovery
 
-Start the target application in one terminal and leave it running:
+This is the only part that calls a model. One discovery run is 22 model calls
+and takes about 90 seconds.
+
+```bash
+./scripts/demo.sh
+```
+
+It starts the mock application itself, then walks the whole slice: discovery →
+artifact → smoke replay → approval → happy path → business outcome → invalid
+input → injected failure → human handoff → agent invocation. Roughly 3 minutes
+end to end.
+
+If you already have the mock app running on port 8799, that is fine — the script
+notices and uses it.
+
+### Or step by step
+
+Start the application and leave it running in its own terminal:
 
 ```bash
 .venv/bin/cua serve-app
 ```
 
-Then, in another terminal:
-
-**1 — Run the agent on a goal, and save the artifact.** This is the only step
-that uses a model. It records the flow, probes how the application reports
-failures, synthesizes the artifact, then replays it once to promote it from
-`draft` to `approved`.
+**1 — Run the agent on a goal and save the artifact.** ~90s. The goal and the
+typed contract are in
+[`tasks/member_savings_lookup.yaml`](tasks/member_savings_lookup.yaml).
 
 ```bash
 .venv/bin/cua discover --task tasks/member_savings_lookup.yaml
 ```
 
-The goal and the typed contract live in
-[`tasks/member_savings_lookup.yaml`](tasks/member_savings_lookup.yaml). The
-artifact is written to `artifacts/member_savings_balance_lookup/v1.0.0.json` and
-evidence to `evidence/discovery/<run_id>/`.
+The agent signs on, works out the flow, extracts the outputs, then deliberately
+probes how the application reports failures so the error rules are grounded in
+wording it actually saw. It writes
+`artifacts/member_savings_balance_lookup/v1.0.0.json`, replays it once to
+promote it from `draft` to `approved`, and leaves evidence in
+`evidence/discovery/<run_id>/`.
 
-**2 — Replay it deterministically, with different inputs.** No model is used.
+**2 — Replay it deterministically, with a different member.** ~10s, no model.
 
 ```bash
 .venv/bin/cua replay -c member_savings_balance_lookup -i member_id=100731
 ```
 
-**3 — Replay the exceptional paths.**
+```text
+[success] member_savings_balance_lookup v1.0.0 — current_savings_balance=129.05, savings_account_status=OPEN, member_name=Marcus Ellery
+```
+
+Member `100731` was never seen during recording. The flow is parameterized, not
+a transcript.
+
+**3 — Replay the exceptional paths.** Each ~10s.
 
 ```bash
-.venv/bin/cua replay -c member_savings_balance_lookup -i member_id=999999   # business outcome
+.venv/bin/cua replay -c member_savings_balance_lookup -i member_id=999999
 ```
+A legitimate business answer, not a crash: `status=business_outcome`,
+`outcome=member_not_found`.
+
 ```bash
-.venv/bin/cua replay -c member_savings_balance_lookup -i member_id=oops     # invalid input
+.venv/bin/cua replay -c member_savings_balance_lookup -i member_id=oops
 ```
+The caller's argument fails its declared pattern: `status=invalid_input`,
+rejected in 1 ms without touching the application.
+
 ```bash
 .venv/bin/cua inject app_error && .venv/bin/cua replay -c member_savings_balance_lookup -i member_id=100244 ; .venv/bin/cua inject none
 ```
+A genuine host fault: `status=failure` with the failed step, what was expected,
+what was observed, and a screenshot, accessibility snapshot and DOM snapshot.
 
-**4 — Escalation, same-session human takeover, resume.** Member 100999 is
-entitlement-restricted; a supervisor override clears it.
+**4 — Escalation, same-session human takeover, resume.** ~12s. Member `100999`
+is entitlement-restricted; a supervisor override clears it. This runs with a
+scripted stand-in operator so it needs no interaction — see
+[the section below](#human-in-the-loop-with-a-real-person) to do it yourself.
 
 ```bash
 .venv/bin/cua replay -c member_savings_balance_lookup -i member_id=100999 --operator scripted
@@ -121,41 +202,12 @@ entitlement-restricted; a supervisor override clears it.
 .venv/bin/cua invoke member_savings_balance_lookup -i member_id=100244
 ```
 
-### Or run the whole thing at once
-
-```bash
-./scripts/demo.sh
-```
-
-Starts the mock app, runs discovery, and walks every path above.
+The first emits JSON-schema tool definitions; the second invokes the capability
+by name and returns a typed JSON result.
 
 ---
 
-## Running without model access
-
-Everything except discovery works with no API key, because replay never calls a
-model. The artifact is committed, so a reviewer can go straight to the
-production path:
-
-```bash
-./scripts/replay.sh
-```
-
-That starts the mock app and runs the happy path, the business outcome, the
-invalid input, the injected failure and the human handoff. The full test suite
-is also model-free:
-
-```bash
-./scripts/test.sh
-```
-
-119 tests, none of which call a model: schema and validation, templating and
-typed coercion, locator resolution and candidate generation, predicate
-evaluation, the safety gate and redactor, the control state machine and operator
-console, synthesis, the catalog, and ten browser-backed end-to-end replays
-covering every runtime-condition category.
-
-### Verifying that replay really uses no model
+## Verifying that replay really uses no model
 
 The claim that production replay has no LLM in the decision loop is the whole
 point of the design, so it is made falsifiable rather than asserted:
@@ -246,6 +298,25 @@ about ten seconds:
 
 It uses the identical control-transfer machinery and its recorded actions are
 tagged `"simulated": true`, so the evidence never overstates what happened.
+
+---
+
+## If something goes wrong
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `Address already in use` / `Port 8799 is in use` | A mock app is already running. | Harmless if you meant to reuse it — the scripts detect and use it. Otherwise `pkill -f mockapp.app`. |
+| `blocked_by_policy … origin … is not in the allowlist` | You changed `MERIDIAN_BASE_URL`. | This is the safety gate working. Add the origin to `config/allowlist.yaml`. |
+| `ANTHROPIC_API_KEY is not set` | Only `cua discover` needs it. | Add it to `.env`, or skip discovery — the artifact is already committed. |
+| `the target application is not answering` | The mock app is not running. | `.venv/bin/cua serve-app`, or use `./scripts/demo.sh` which starts it for you. |
+| `invalid_input … does not match the declared pattern` | Member ids are six digits. | Try `100244`, `100731`, `100999`, or `999999` for the not-found path. |
+| `session_closed` during a handoff | The Chromium window was closed. | That window *is* the shared session. Re-run and use *Release & resume*. |
+| `playwright … Executable doesn't exist` | Chromium was not downloaded. | `.venv/bin/python -m playwright install chromium`. |
+
+Every run leaves a full record under `evidence/<phase>/<run_id>/`: `result.json`
+(the structured result), `run.jsonl` (what happened and why), `screens/` and,
+on failure, `snapshots/` with the accessibility tree and DOM at the moment it
+broke. That is usually faster than re-running with more logging.
 
 ---
 
