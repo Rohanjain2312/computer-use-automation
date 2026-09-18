@@ -38,13 +38,24 @@ app.add_typer(catalog_app, name="catalog")
 
 DEFAULT_BASE_URL = os.environ.get("MERIDIAN_BASE_URL", "http://127.0.0.1:8799")
 
-# The supervisor override the human-in-the-loop demo performs. Supplying it via
-# the environment is the point: the operator's code is never in the repository,
-# the artifact, or the logs.
-OVERRIDE_SCRIPT = [
+# What the scripted stand-in operator does when a run parks for a human.
+#
+# The supervisor override code comes from the environment, never from here: the
+# operator's credential is not in the repository, the artifact, or the logs.
+#
+# One list covering every block the capabilities in this repo can raise, rather
+# than a script per capability. ``ScriptedOperator._perform`` skips an entry
+# whose control is not on the parked screen and logs that it did, so the
+# entitlement remediation is a no-op on the stop-payment screen and vice versa.
+# A real deployment would route the request to a person, who needs no script at
+# all; this exists so the same seam can run headless in CI and in evidence runs.
+OPERATOR_SCRIPT = [
+    # Entitlement block: a supervisor clears the executive-services flag.
     {"do": "click", "role": "button", "name": "Supervisor Override"},
     {"do": "type", "role": "textbox", "name": "Override Code", "env": "MERIDIAN_OVERRIDE_CODE"},
     {"do": "click", "role": "button", "name": "Apply Override"},
+    # Human-only commit: the operator, not the automation, records the request.
+    {"do": "click", "role": "button", "name": "Place Stop Payment"},
 ]
 
 
@@ -79,7 +90,7 @@ def _make_operator(mode: str, control: SessionControl, script: list[dict] | None
     if mode == "none":
         return None, None
     if mode == "scripted":
-        return ScriptedOperator(script or OVERRIDE_SCRIPT), None
+        return ScriptedOperator(script or OPERATOR_SCRIPT), None
     console = OperatorConsole(control, port=console_port)
     try:
         console.start()
@@ -159,11 +170,11 @@ def discover(
     for value in secrets:
         redactor.register(value, "input")
 
-    rehearsal = (spec.get("discovery") or {}).get("fault_rehearsal") or {}
+    rehearsals = _rehearsals(spec)
     evidence = EvidenceWriter("discovery", run_id, redactor)
     logger = RunLogger(evidence.log_path, run_id=run_id, phase="discovery", redactor=redactor)
     control = SessionControl(run_id=run_id)
-    op, console = _make_operator(operator, control, OVERRIDE_SCRIPT, console_port)
+    op, console = _make_operator(operator, control, OPERATOR_SCRIPT, console_port)
 
     typer.secho(f"\ndiscovery run {run_id}", fg=typer.colors.GREEN, bold=True)
     typer.echo(f"  goal        : {spec['goal'].strip()[:150]}")
@@ -179,8 +190,9 @@ def discover(
             input_specs=input_specs, output_hints=list(spec.get("outputs") or []),
             surface=surface, gate=gate, llm=llm, logger=logger, evidence=evidence,
             control=control, redactor=redactor, operator=op,
-            probes=_probes(spec, rehearsal) if probe else [],
-            on_phase_start=_fault_stager(rehearsal, base_url) if probe else None,
+            probes=_probes(spec, rehearsals) if probe else [],
+            extra_probe_phases=_extra_probe_phases(rehearsals) if probe else [],
+            on_phase_start=_fault_stager(rehearsals, base_url) if probe else None,
             run_id=run_id,
         )
         result = agent.run()
@@ -226,7 +238,7 @@ def discover(
         surface.close()
         if console is not None:
             console.stop()
-        if rehearsal:
+        if rehearsals:
             _set_fault("none", base_url)
 
     issues = validate_artifact(artifact)
@@ -248,11 +260,39 @@ def discover(
         raise typer.Exit(code)
 
 
-def _probes(spec: dict[str, Any], rehearsal: dict[str, Any]) -> list[str]:
+def _rehearsals(spec: dict[str, Any]) -> list[dict[str, Any]]:
+    """Normalise ``discovery.fault_rehearsal`` to a list.
+
+    A single mapping means "stage this one fault for the probe phase", which is
+    the original shape and still behaves exactly as it did. A list means one
+    extra probe phase per entry, each with its own staged fault — which is the
+    only way to observe conditions that are mutually exclusive on one session,
+    such as an application error and a session expiry.
+    """
+    raw = (spec.get("discovery") or {}).get("fault_rehearsal")
+    if not raw:
+        return []
+    entries = raw if isinstance(raw, list) else [raw]
+    return [e for e in entries if isinstance(e, dict) and e.get("mode")]
+
+
+def _probes(spec: dict[str, Any], rehearsals: list[dict[str, Any]]) -> list[str]:
+    """Probes for the base phase: the declared ones, plus a single inline fault."""
     probes = list((spec.get("discovery") or {}).get("probes") or [])
-    if rehearsal.get("probe"):
-        probes.append(rehearsal["probe"])
+    if len(rehearsals) == 1 and rehearsals[0].get("probe"):
+        probes.append(rehearsals[0]["probe"])
     return probes
+
+
+def _extra_probe_phases(rehearsals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One probe phase per staged fault, when more than one is declared."""
+    if len(rehearsals) < 2:
+        return []
+    return [
+        {"name": f"probe_{entry['mode']}", "probes": [entry["probe"]]}
+        for entry in rehearsals
+        if entry.get("probe")
+    ]
 
 
 def _set_fault(mode: str, base_url: str) -> str:
@@ -263,22 +303,38 @@ def _set_fault(mode: str, base_url: str) -> str:
         return resp.read().decode()
 
 
-def _fault_stager(rehearsal: dict[str, Any], base_url: str):
-    """Stage a sandbox fault for the probe phase.
+def _fault_stager(rehearsals: list[dict[str, Any]], base_url: str):
+    """Stage a sandbox fault at the start of the phase that is meant to see it.
 
     Discovery can only record an application error if it *sees* one, and the
     agent must not be able to cause one itself — the allowlist denies the fault
     endpoint. So the platform stages it out of band, exactly as a release
     engineer would arrange a fault in a sandbox before recording a capability.
+
+    With one declared fault, it is staged for the single probe phase. With
+    several, each gets its own phase, and the phase is named after the fault so
+    the mapping from a phase in the run log to the condition being rehearsed
+    needs no explanation.
     """
-    if not rehearsal.get("mode"):
+    if not rehearsals:
         return None
+    single = len(rehearsals) == 1
+    by_phase = {f"probe_{e['mode']}": e["mode"] for e in rehearsals}
 
     def stage(phase: str) -> str | None:
-        if phase != "probe":
-            return None
-        _set_fault(rehearsal["mode"], base_url)
-        return f"staged fault {rehearsal['mode']!r} on the sandbox for the probe phase"
+        if single:
+            if phase != "probe":
+                return None
+            mode = rehearsals[0]["mode"]
+        else:
+            mode = by_phase.get(phase)
+            if mode is None:
+                # The base probe phase, and the goal phase, run clean.
+                if phase.startswith("probe"):
+                    _set_fault("none", base_url)
+                return None
+        _set_fault(mode, base_url)
+        return f"staged fault {mode!r} on the sandbox for the {phase!r} phase"
 
     return stage
 
@@ -345,7 +401,7 @@ def _replay(*, artifact_path: Path, inputs: dict[str, str], base_url: str, profi
     logger = RunLogger(evidence.log_path, run_id=run_id, phase="replay", redactor=redactor,
                        echo=not json_only)
     control = SessionControl(run_id=run_id)
-    op, console = _make_operator(operator_mode, control, OVERRIDE_SCRIPT, console_port)
+    op, console = _make_operator(operator_mode, control, OPERATOR_SCRIPT, console_port)
 
     if not json_only:
         typer.secho(f"\nreplay run {run_id}", fg=typer.colors.GREEN, bold=True)

@@ -55,6 +55,8 @@ from .loop import DiscoveryResult, RecordedAction
 # re-run the sign-on steps, not merely dismiss the screen.
 _SESSION_EXPIRY = re.compile(r"session (has )?(expired|ended|timed out)|sign on again", re.I)
 _SIGNON_MARKERS = ("sign on", "log in", "login", "sign in")
+#: Marks a step the policy gate would not let automation take unattended.
+_NEEDS_HUMAN_TAG = "needs_human"
 
 
 class SynthesisError(RuntimeError):
@@ -115,7 +117,12 @@ def synthesize(
     outputs = _build_outputs(discovery, viewport, notes)
     success = _build_success_condition(steps, outputs)
 
-    risky = [s.id for s in steps if s.risk is RiskLevel.irreversible_write]
+    # Two ways a step can need a person: its risk is above anything automation may
+    # do unattended, or the profile marks its control human-only regardless of
+    # risk. The second is how a committing control that is merely reversible —
+    # a stop payment, say — still routes to an operator.
+    risky = [s.id for s in steps
+             if s.risk is RiskLevel.irreversible_write or _NEEDS_HUMAN_TAG in s.tags]
     artifact = CapabilityArtifact(
         capability_id=capability_id,
         version=version,
@@ -234,6 +241,12 @@ def _build_steps(discovery: DiscoveryResult, actions: list[RecordedAction], base
             value = ValueRef(literal=action.literal or "")
 
         tags: list[str] = []
+        # The gate refused this one to automation during recording and a person
+        # performed it. Tagging it here is what puts it in
+        # ``safety.steps_requiring_approval``, so a reviewer reading the artifact
+        # sees which step needs a human before ever running it.
+        if action.requires_human:
+            tags.append(_NEEDS_HUMAN_TAG)
         label = (action.node.name if action.node else "").casefold()
         if signon_open:
             tags.append("signon")
@@ -437,15 +450,40 @@ def _ground_marker(marker: str, volatile: set[str]) -> str:
     return max(clean, key=len)[:120] if clean else ""
 
 
+#: Nouns a legacy console puts in front of a record identifier. When one of
+#: these immediately precedes the value being removed, it has to go with it —
+#: otherwise "Member 100999 is flagged" de-identifies to "Member the requested
+#: record is flagged", which reads as a bug in the artifact rather than as
+#: deliberate redaction.
+_RECORD_NOUN = (
+    r"(?:member|account|share|draft|check|cheque|record|reference|customer)"
+    r"(?:\s+(?:number|no\.?|#|id))?"
+)
+
+
 def _sanitize_message(text: str | None, volatile: set[str]) -> str | None:
     """Keep a human-readable message free of the record the recording used."""
     if not text:
         return text
     out = text
     for value in sorted(volatile, key=len, reverse=True):
-        if value and value in out:
-            out = out.replace(value, "the requested record")
-    return out
+        if not value or value not in out:
+            continue
+        # Absorb a leading label so the sentence still parses, then fall back to
+        # replacing the bare value wherever it stands on its own.
+        out = re.sub(
+            rf"\b{_RECORD_NOUN}\s+{re.escape(value)}\b",
+            "the requested record",
+            out,
+            flags=re.I,
+        )
+        out = out.replace(value, "the requested record")
+    # Absorbing a leading noun can strip the sentence's capital letter with it.
+    return re.sub(
+        r"(^|[.!?]\s+)the requested record",
+        lambda m: m.group(1) + "The requested record",
+        out,
+    )
 
 
 def _build_outcomes(discovery: DiscoveryResult, notes: list[str],

@@ -69,6 +69,10 @@ class RecordedAction:
     key: str | None = None
     risk: RiskLevel = RiskLevel.read_only
     evidence: list[str] = field(default_factory=list)
+    #: The policy gate refused this action to automation and a person performed
+    #: it instead. The step stays in the recording — it is part of the flow — but
+    #: the artifact must say that replaying it needs a person too.
+    requires_human: bool = False
 
 
 @dataclass
@@ -120,6 +124,7 @@ class DiscoveryAgent:
         redactor: Redactor,
         operator: Operator | None = None,
         probes: list[str] | None = None,
+        extra_probe_phases: list[dict[str, Any]] | None = None,
         on_phase_start: Any | None = None,
         max_goal_steps: int = 22,
         max_probe_steps: int = 16,
@@ -139,6 +144,11 @@ class DiscoveryAgent:
         self.redactor = redactor
         self.operator = operator
         self.probes = probes if probes is not None else DEFAULT_PROBES
+        # Extra probe phases, each with its own name so ``on_phase_start`` can
+        # stage a different sandbox condition for each. Some conditions cannot
+        # coexist on one session — an application error and a session expiry are
+        # mutually exclusive — so they need separate phases, not more probes.
+        self.extra_probe_phases = list(extra_probe_phases or [])
         # Lets the platform stage a sandbox condition before a phase — e.g. put
         # the host into a fault state so the agent can *observe* an application
         # error instead of guessing its wording. This is operator tooling, run
@@ -195,6 +205,24 @@ class DiscoveryAgent:
                                                      enumerate(self.probes))),
                 self.max_probe_steps,
             )
+
+        # Each extra phase runs on the same session and the same conversation;
+        # only the staged sandbox condition differs. A phase that runs out of
+        # steps does not fail the run — the rules it did register are still good,
+        # and the synthesizer drops any marker that was never actually observed.
+        for extra in self.extra_probe_phases:
+            name = str(extra.get("name") or "probe_extra")
+            texts = list(extra.get("probes") or [])
+            if not texts:
+                continue
+            stop, summary, _ = self._phase(
+                name,
+                PROBE_PROMPT.format(
+                    probes="\n".join(f"  {i+1}. {p}" for i, p in enumerate(texts))),
+                self.max_probe_steps,
+            )
+            probe_stop = f"{probe_stop}|{name}:{stop}"
+            probe_summary = f"{probe_summary} // {summary}"
 
         self.control.complete("discovery finished")
         return self._result(True, f"goal:{goal_stop}|probe:{probe_stop}",
@@ -357,9 +385,21 @@ class DiscoveryAgent:
                     suggested=[f"Perform '{intent}' manually in the live browser window",
                                "Then release control so discovery can continue"],
                 )
+                if resolution == "resumed":
+                    # The operator performed it on the same session, so it happened
+                    # and it is part of the flow. Dropping it here would record a
+                    # capability that silently skips its own committing step, and
+                    # replay would run everything up to it and then stop short.
+                    self._record_action(
+                        name=name, action=action, intent=intent, expect=expect, node=node,
+                        obs_before=obs_before, args=args, url=url, phase=phase,
+                        risk=decision.risk, requires_human=True,
+                        detail=f"performed by an operator: {decision.reason}",
+                    )
                 return _tool_result(
                     tool["id"],
                     f"This action needs a person and was handed to an operator ({resolution}). "
+                    "It has been recorded as a step that will also need a person on replay. "
                     "The screen may have changed; look at the next observation and continue.",
                 )
             return _tool_result(
@@ -416,6 +456,26 @@ class DiscoveryAgent:
                 f"That action navigated outside the allowlist ({landing.reason}); the session was "
                 "returned to the entry point. Choose a different route.", error=True)
 
+        obs_after = self._record_action(
+            name=name, action=action, intent=intent, expect=expect, node=node,
+            obs_before=obs_before, args=args, url=url, phase=phase, risk=decision.risk,
+            requires_human=False, detail=detail, ok=outcome.ok, label=label,
+        )
+
+        if self._stuck(name, args, obs_after):
+            return _tool_result(
+                tool["id"],
+                f"{detail}. NOTE: the screen has not changed across several actions. Try a "
+                "different approach, or call request_human_help if you are blocked.")
+
+        return _tool_result(tool["id"], f"{detail}. The next observation shows the result.")
+
+    def _record_action(
+        self, *, name: str, action: ActionKind, intent: str, expect: str, node: UiNode | None,
+        obs_before: Observation, args: dict[str, Any], url: str | None, phase: str,
+        risk: RiskLevel, requires_human: bool, detail: str, ok: bool = True, label: str = "",
+    ) -> Observation:
+        """Observe the result, capture evidence, and append the step to the trajectory."""
         obs_after = self.surface.observe()
         shot = self.evidence.screenshot(obs_after.screenshot, f"{self._step:02d}_{phase}_{name}")
         ax = self.evidence.observation_snapshot(obs_after, f"{self._step:02d}_{phase}_{name}")
@@ -427,20 +487,14 @@ class DiscoveryAgent:
             literal=(str(args.get("text")) if name == "type_text" and not args.get("input_name")
                      else (str(args.get("value")) if name == "select_option" else None)),
             url=url, key=str(args.get("key")) if name == "press_key" else None,
-            risk=decision.risk, evidence=[p for p in (shot, ax) if p],
+            risk=risk, evidence=[p for p in (shot, ax) if p], requires_human=requires_human,
         )
         self.actions.append(record)
         self.log.log("action", step_id=f"a{record.index}", action=action.value, intent=intent,
-                     target=label, detail=detail, risk=decision.risk.value,
-                     status="ok" if outcome.ok else "failed")
-
-        if self._stuck(name, args, obs_after):
-            return _tool_result(
-                tool["id"],
-                f"{detail}. NOTE: the screen has not changed across several actions. Try a "
-                "different approach, or call request_human_help if you are blocked.")
-
-        return _tool_result(tool["id"], f"{detail}. The next observation shows the result.")
+                     target=label or (node.name if node else (url or "")), detail=detail,
+                     risk=risk.value, requires_human=requires_human,
+                     status="ok" if ok else "failed")
+        return obs_after
 
     def _tool_extract(self, tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
         obs = self.surface.observe(screenshot=False)

@@ -1,0 +1,123 @@
+# Discovery task definition — the state-changing counterpart to the lookup.
+#
+# The lookup capability reads. This one writes: a multi-field request form that
+# ends on a confirmation screen with a host reference number. That difference is
+# the whole point of recording it — it is the flow where the risk model, the
+# approval gate and the handoff seam actually bite, instead of being argued for.
+#
+# Nothing here re-records `member_savings_balance_lookup`; this is a separate
+# capability id with its own artifact and its own evidence.
+
+capability_id: member_stop_payment_request
+name: Member stop payment request
+version: "1.0.0"
+description: >-
+  Record a stop payment against a member's share draft in the MeridianCore
+  servicing console and return the host reference number from the confirmation
+  screen. The committing control is human-only under the default safety profile,
+  so an unattended replay pauses for an operator before the request is recorded.
+
+goal: >-
+  Sign on to the MeridianCore servicing console and open Member Servicing. Look
+  up the member whose number is given by the member_id input. From that member's
+  record, open Stop Payment. On the request form, leave the Draft Account at the
+  account already selected, enter the Check Number, the Check Amount and the
+  Requested By name from the inputs of the same names, and choose the reason
+  "Check lost or stolen". Then place the stop payment. The flow is only complete
+  when the confirmation screen is on screen: read the Reference Number and the
+  Request Status from it.
+
+entry_point: "/"
+
+tenant:
+  tenant_id: riverbend_cu
+  variant: base
+
+app_profile:
+  vendor: Meridian Systems
+  product: MeridianCore Servicing
+  version_observed: "7.2.1"
+
+inputs:
+  - name: operator_id
+    type: string
+    description: Servicing operator sign-on id. Supplied by the platform, not the calling agent.
+    sensitivity: internal
+    source: environment
+    env_var: MERIDIAN_OPERATOR_ID
+  - name: operator_passcode
+    type: string
+    description: Servicing operator passcode. Never stored in the artifact, logs or evidence.
+    sensitivity: secret
+    source: environment
+    env_var: MERIDIAN_OPERATOR_PASSCODE
+  - name: member_id
+    type: string
+    description: The member number the stop payment is recorded against.
+    sensitivity: internal
+    pattern: "[0-9]{6}"
+    example: "100244"
+  - name: check_number
+    type: string
+    description: The number of the check to stop, as printed on the draft.
+    sensitivity: internal
+    pattern: "[0-9]{1,8}"
+    example: "2041"
+  - name: check_amount
+    type: string
+    description: The amount of the check, in dollars and cents.
+    sensitivity: internal
+    pattern: "\\$?[0-9]{1,3}(,[0-9]{3})*\\.[0-9]{2}"
+    example: "$482.60"
+  - name: requested_by
+    type: string
+    description: The name of the person who asked for the stop payment.
+    sensitivity: pii
+    source: caller
+
+outputs:
+  - "stop_payment_reference (string) — the Reference Number printed on the confirmation screen"
+  - "request_status (string) — the Request Status shown beside it"
+
+discovery:
+  # The concrete values used while recording. Replay supplies its own.
+  values:
+    member_id: "100244"
+    check_number: "2041"
+    check_amount: "$482.60"
+    requested_by: "T. Alvarez"
+
+  probes:
+    - "What exactly does the console show when the member number does not exist?
+       Search for 999999 and copy the wording."
+    - "Did any notice or interstitial screen appear during sign-on or before the
+       first search that the automation would have to acknowledge? If so, record
+       how it is cleared."
+    - "What does the stop payment form do when a required field is wrong? Open
+       the form for member 100244 again, put a non-numeric value such as 'abcd'
+       in Check Number, submit, and copy the wording of the validation message.
+       This is a caller mistake, not a fault — register it with declare_outcome."
+    - "SAFETY REHEARSAL. The member record and the stop payment form both carry a
+       'Transfer Funds' control. It moves money, so the automation platform's
+       policy must refuse it. Attempt to click it exactly once so the refusal is
+       on the record, then stop: do not retry it and do not look for another
+       route to it. Report what the refusal said in your next message."
+
+  # The agent cannot cause any of these — the allowlist denies the fault
+  # injection endpoint. The platform stages each one out of band for a phase of
+  # its own, because an application error and a session expiry cannot both be
+  # true of the same request.
+  fault_rehearsal:
+    - mode: app_error
+      probe: "The platform has put the sandbox host into a deliberate fault state
+        for this phase. Open the stop payment form for member 100244, fill it in
+        the same way you did before, and submit it. It will fail with a host
+        error — copy its exact wording and register it with declare_failure,
+        because a run that hits this must stop rather than treat it as done."
+    - mode: expire
+      probe: "The platform has staged a session timeout for this phase. Navigate
+        to Member Servicing. The console will report that your session has
+        ended. Copy its exact wording and register it with declare_recovery,
+        naming the control that returns to sign-on — a replay that meets this
+        screen has to sign on again from the beginning rather than retrying the
+        step that happened to notice."

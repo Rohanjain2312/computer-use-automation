@@ -214,6 +214,30 @@ def test_messages_do_not_name_the_record_the_recording_used():
     assert "100999" not in out and "EXECUTIVE SERVICES" in out
 
 
+def test_removing_a_record_id_takes_its_label_with_it():
+    """Otherwise the message reads 'Member the requested record is flagged'."""
+    from cua.discovery.synthesize import _sanitize_message
+
+    out = _sanitize_message("Member 100999 is flagged EXECUTIVE SERVICES.", {"100999"})
+    assert out == "The requested record is flagged EXECUTIVE SERVICES." or \
+           out == "the requested record is flagged EXECUTIVE SERVICES."
+    assert "Member the requested record" not in out
+
+
+def test_a_bare_identifier_with_no_label_is_still_replaced():
+    from cua.discovery.synthesize import _sanitize_message
+
+    out = _sanitize_message("Searched member number: 999999", {"999999"})
+    assert "999999" not in out and "the requested record" in out
+
+
+def test_sanitising_leaves_wording_that_carries_no_record_alone():
+    from cua.discovery.synthesize import _sanitize_message
+
+    text = "The host transaction could not be completed."
+    assert _sanitize_message(text, {"100999"}) == text
+
+
 def test_a_value_target_is_described_without_its_value():
     """The reviewer should read 'the cell beside Member Name', not the name itself."""
     from cua.locate.candidates import build_target_plan
@@ -226,3 +250,63 @@ def test_a_value_target_is_described_without_its_value():
     plan = build_target_plan(nodes[1], observation(nodes), purpose="value")
     assert "Dana Whitfield" not in plan.description
     assert "Member Name" in plan.description
+
+
+# -- steps that need a person --------------------------------------------
+
+
+def _synthesize(actions):
+    from cua.discovery.loop import DiscoveryResult
+    from cua.discovery.synthesize import synthesize
+
+    result = DiscoveryResult(
+        run_id="disc_test", goal="record a stop payment", success=True,
+        stop_reason="finished", summary="ok", actions=actions,
+        entry_point="http://h/", model="test-model", model_calls=1,
+    )
+    artifact, _notes = synthesize(
+        result, capability_id="cap", name="Cap", version="1.0.0", description="d",
+        input_specs=[], tenant_id="t", variant="base",
+        app_profile={"vendor": "v", "product": "p"}, base_url="http://h",
+        allowlist_profile="default", transcript_sha256="0" * 64,
+        transcript_path="evidence/x", model="test-model", model_calls=1,
+        viewport={"width": 1280, "height": 900},
+    )
+    return artifact
+
+
+def _click(index, intent, control, *, requires_human=False, risk=RiskLevel.read_only,
+           before="Before", after="After"):
+    from cua.discovery.loop import RecordedAction
+
+    return RecordedAction(
+        index=index, phase="goal", tool="click", action=ActionKind.click, intent=intent,
+        expect=after, node=node(f"n{index}", "button", control),
+        obs_before=observation([node(f"n{index}", "button", control)], text=before),
+        obs_after=observation([], text=after),
+        risk=risk, requires_human=requires_human)
+
+
+def test_a_step_the_gate_refused_to_automation_is_listed_as_needing_approval():
+    """The committing click is recorded, and the artifact says it needs a person."""
+    artifact = _synthesize([
+        _click(0, "open the request form", "Stop Payment",
+               before="Member Record", after="Stop Payment Request"),
+        _click(1, "record the stop payment", "Place Stop Payment", requires_human=True,
+               risk=RiskLevel.reversible_write,
+               before="Stop Payment Request", after="Stop Payment Recorded"),
+    ])
+
+    approval = artifact.safety.steps_requiring_approval
+    assert len(approval) == 1
+    needs = next(s for s in artifact.steps if s.id in approval)
+    assert needs.intent == "record the stop payment"
+    assert "needs_human" in needs.tags
+
+
+def test_an_ordinary_step_is_not_listed_as_needing_approval():
+    artifact = _synthesize([
+        _click(0, "open the request form", "Stop Payment",
+               before="Member Record", after="Stop Payment Request"),
+    ])
+    assert artifact.safety.steps_requiring_approval == []
