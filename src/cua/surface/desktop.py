@@ -20,12 +20,31 @@ targeting strategies in the artifact were chosen the way they were:
 | ``dom_hint``        | **web only** — skipped        | not applicable               | not applicable                 |
 | ``viewport_ratio``  | normalized coordinates        | screen coordinates           | screen coordinates             |
 
-``Surface.capabilities()`` is what makes the last two rows safe: a surface
-declares which strategies it can resolve, and ``locate.strategies.resolve``
-skips the rest and records that it skipped them. A capability recorded on the
-web whose every step also has a portable strategy will replay on desktop; one
-that fell back to ``dom_hint`` will fail loudly on the step that needs it, with
-the artifact's own ``required_strategies`` saying so up front.
+``dom_hint`` is the only row with no desktop analogue at all; ``viewport_ratio``
+ports, but as screen coordinates it is a last resort on either surface.
+
+``Surface.capabilities()`` is what makes that safe, and it is enforced at two
+different granularities:
+
+* **Before step 0.** ``ReplayEngine._check_surface_support`` compares the
+  artifact's ``surface.required_strategies`` against ``capabilities()`` and
+  fails with ``error_class="surface_unsupported"`` naming the missing
+  strategies, without touching the application.
+* **Within a step.** ``locate.strategies.resolve`` skips an unsupported
+  strategy and records the skip in the step's locator attempts, so a plan that
+  has a portable fallback still resolves.
+
+Be precise about what the first of those actually buys, because it is coarser
+than it looks. ``required_strategies`` is synthesized as the *union* of every
+strategy on every target, and candidate generation always appends a
+``dom_hint`` and a ``viewport_ratio`` fallback — so every web-recorded artifact
+lists ``dom_hint``, and the pre-flight therefore refuses web recordings on a
+desktop surface **as a class**. That is a defensible default (refusing up front
+beats discovering it with the application half-driven) but it is not a
+per-capability portability verdict, and it does not distinguish a flow whose
+every step has a portable primary from one that genuinely depends on markup.
+Making it precise means recording the minimal set each target actually relies
+on rather than everything generated for it; see REPORT.md § Cuts.
 
 ## What implementing this actually takes
 

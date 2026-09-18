@@ -164,6 +164,7 @@ class ReplayEngine:
 
         try:
             self._validate_artifact()
+            self._check_surface_support()
             self._bind(supplied_inputs)
             self._execute_steps()
             outputs = self._extract_outputs()
@@ -256,6 +257,51 @@ class ReplayEngine:
                     ),
                 }
             )
+
+    def _check_surface_support(self) -> None:
+        """Refuse a surface that cannot resolve everything the artifact records.
+
+        ``required_strategies`` is the union of every strategy on every target,
+        so this check is deliberately conservative: a surface that fails it may
+        still have resolved each individual step through a portable fallback.
+        Refusing before step 0 is the better trade anyway — the alternative is
+        finding out halfway through, with the application already half-driven
+        and no way to know whether the steps already taken are safe to leave.
+        """
+        required = set(self.artifact.surface.required_strategies)
+        if not required:
+            return
+        supported = self.surface.capabilities()
+        missing = sorted(k.value for k in required - supported)
+        self.log.log(
+            "surface_support_checked",
+            surface=getattr(self.surface, "kind", "unknown"),
+            required=sorted(k.value for k in required),
+            unsupported=missing,
+        )
+        if not missing:
+            return
+        raise _Terminal(
+            {
+                "status": ReplayStatus.failure,
+                "failure": FailureDetail(
+                    error_class="surface_unsupported",
+                    message=(
+                        f"this artifact records targeting strategies the "
+                        f"{getattr(self.surface, 'kind', 'unknown')!r} surface cannot resolve: "
+                        f"{', '.join(missing)}. Re-record the capability on this surface, or "
+                        f"run it on one that supports them."
+                    ),
+                    expected=(
+                        "a surface supporting every strategy in "
+                        f"surface.required_strategies ({', '.join(sorted(k.value for k in required))})"
+                    ),
+                    observed=(
+                        f"the surface resolves {', '.join(sorted(k.value for k in supported))}"
+                    ),
+                ),
+            }
+        )
 
     def _bind(self, supplied: dict[str, Any]) -> None:
         try:
