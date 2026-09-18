@@ -23,3 +23,10 @@ runtime/
 
 # Evidence is a deliverable and IS committed. Scratch runs are not:
 evidence/**/scratch/
+
+# Working documents — kept locally, deliberately not published.
+Assignment A — Computer-Use Automation System.pdf
+ASSIGNMENT_LLM_FRIENDLY_SPEC.md
+PROGRESS.md
+requirements_matrix.md
+REVIEW_FINDINGS.md
