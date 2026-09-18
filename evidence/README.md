@@ -287,8 +287,50 @@ rules · 1 failure rule · `status: approved`.
 | `replay_sp_app_error_…035f07` | `failure` | Category C on the write path: a staged host fault at the search step, with expected/observed and three snapshots. |
 | `replay_sp_expiry_…8a51e5` | `success` | **Session expiry.** The recovery rule fires, `flow_rewound … resuming from 's00_open'`, the run signs on again, clears the interstitial, and completes. |
 | `replay_invoke_…f9f239` | `failure` | Invoked by an agent with **no operator channel**. It refuses to commit and says why, rather than proceeding: `intervention int_… was raised but no operator channel is configured for this run`. |
+| `replay_run_…b2bfa1` | `success` | **The commit performed by an actual person**, not the scripted stand-in. Detailed below. |
 
-### 4d. The blocked run, in detail
+Its label is the default `run` because it was produced by a plain
+`cua replay … --operator console` rather than one of the labelled scripts. The
+directory keeps the name the tool gave it — `result.json` records that name in
+`run_id`, `evidence_dir` and `log_path`, so renaming it for tidiness would make
+the evidence describe paths that do not exist.
+
+### 4d. The commit, approved by a human
+
+`replay_run_20260918T184204Z_b2bfa1/result.json`
+
+The handoff that matters most on this capability, because approving a
+state-changing commit is the case the whole safety model exists for. A person
+drove it through the operator console — 85 seconds, `status: success`, returning
+`SP-100731-884-32`:
+
+```json
+{ "description": "clicked the 'Place Stop Payment' button",
+  "actor": "operator",
+  "simulated": false }
+```
+
+All three recorded actions carry `"simulated": false`. The control log shows the
+same ordering the scripted operator produces —
+
+```
+session_opened → automation_paused → control_granted → control_released
+              → automation_resumed → session_closed
+```
+
+— which is the point: the seam does not care who is on the other end of it. The
+run pauses because `Place Stop Payment` is human-only under the default profile,
+not because anything went wrong, so this is the *ordinary* path for this
+capability rather than an exception.
+
+Note the first recorded action, `entered a value into 'Requested By'`. The
+operator did not type it — automation did, at step `s10`. The field's `change`
+event fired on blur once the person clicked away, and the recorder attributes it
+to whoever held the session at the time. Over-attributing to the person who was
+present is the safer direction, and it is why the record is captured from
+listeners rather than inferred from the script.
+
+### 4e. The blocked run, in detail
 
 `replay_sp_blocked_20260918T173556Z_64184a/result.json`
 

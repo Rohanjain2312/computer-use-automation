@@ -33,8 +33,8 @@ Two capabilities are recorded against it:
 - **[DECISIONS.md](DECISIONS.md)** — the open-ended choices, the alternatives
   considered, and what each one costs.
 - **[evidence/README.md](evidence/README.md)** — two real discovery runs, the
-  deterministic replays behind every result status, and a human takeover
-  performed by an actual person, annotated.
+  deterministic replays behind every result status, and a human takeover on each
+  capability performed by an actual person, annotated.
 
 ---
 

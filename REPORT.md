@@ -193,9 +193,10 @@ fixes the problem first is still recorded, flagged `before_takeover`
 (`DECISIONS.md` D13).
 
 **What is mocked.** The operator interface is minimal but real, and the repo
-holds a run of it performed by an actual person — every action `"simulated":
-false`. For headless runs a `ScriptedOperator` drives the identical seam and tags
-everything `simulated: true`.
+holds a run of it on *each* capability performed by an actual person — clearing
+the entitlement block on one, approving the commit on the other, every action
+`"simulated": false`. For headless runs a `ScriptedOperator` drives the identical
+seam and tags everything `simulated: true`.
 
 # Safety
 
