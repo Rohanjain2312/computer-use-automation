@@ -92,7 +92,7 @@ Then, if you want:
 ./scripts/test.sh
 ```
 
-134 tests in about 75 seconds, none of which call a model: schema and
+137 tests in about 75 seconds, none of which call a model: schema and
 validation, templating and typed coercion, locator resolution and candidate
 generation, predicate evaluation, the safety gate and redactor, the control
 state machine and operator console, synthesis, the catalog, replay pre-flight,
