@@ -72,8 +72,19 @@ def test_happy_path_returns_typed_outputs(surface, allowlist, mock_app, tmp_path
 
     written = json.loads((evidence.root / "result.json").read_text())
     assert written["status"] == "success"
-    # PII is returned to the caller but redacted in persisted evidence.
-    assert "Dana Whitfield" not in (evidence.root / "result.json").read_text()
+
+    # PII is returned to the caller but redacted on *every* persistence path,
+    # not just in result.json — the run log, the snapshots and any intervention
+    # record go through the same redactor. Checking only result.json would pass
+    # while the DOM snapshot beside it still named the member.
+    leaked = [
+        path.relative_to(evidence.root)
+        for path in evidence.root.rglob("*")
+        if path.is_file()
+        and path.suffix != ".png"
+        and "Dana Whitfield" in path.read_text(errors="ignore")
+    ]
+    assert not leaked, f"declared pii value written unredacted to: {leaked}"
 
 
 def test_member_not_found_is_a_business_outcome_not_a_failure(

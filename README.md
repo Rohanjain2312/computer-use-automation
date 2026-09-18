@@ -21,21 +21,26 @@ included in this repo: a frameset with nested iframes, table-based layout,
 `<td onclick=...>` navigation, no test ids and no `<label for>`. It is
 deliberately hostile, because that is what the real systems look like.
 
+Two capabilities are recorded against it:
+
+| Capability | What it does | Why it is here |
+|---|---|---|
+| `member_savings_balance_lookup` | Sign on → search → read a member's Regular Savings balance and status | The read path: typed outputs, business outcomes, a not-found result |
+| `member_stop_payment_request` | Sign on → search → multi-field stop-payment form → **confirmation screen with a host reference** | The write path: the commit is human-only, so it escalates; `Transfer Funds` on the same screen is refused outright |
+
 - **[REPORT.md](REPORT.md)** — architecture, artifact schema, determinism and
   error handling, heterogeneity and multi-tenancy, escalation, safety, cuts.
 - **[DECISIONS.md](DECISIONS.md)** — the open-ended choices, the alternatives
   considered, and what each one costs.
-- **[evidence/README.md](evidence/README.md)** — the real discovery run, six
-  deterministic replays, and a human takeover performed by an actual person,
-  annotated.
-- **[requirements_matrix.md](requirements_matrix.md)** — every requirement, where
-  it lives, what proves it.
+- **[evidence/README.md](evidence/README.md)** — two real discovery runs, the
+  deterministic replays behind every result status, and a human takeover
+  performed by an actual person, annotated.
 
 ---
 
 ## Quickstart — 2 minutes, no API key needed
 
-The recorded capability is committed, so you can run the production path
+Both recorded capabilities are committed, so you can run the production path
 immediately. Nothing here calls a model.
 
 ```bash
@@ -67,17 +72,32 @@ in one command. Each run writes to `evidence/replay/<run_id>/` — `result.json`
 is the structured result, `run.jsonl` is the step-by-step log, `screens/` is
 what the machine saw.
 
+The write-path capability runs the same way, once the mock app is up
+(`.venv/bin/cua serve-app` in another terminal). It pauses for an operator
+before it commits, which is the point:
+
+```bash
+.venv/bin/cua replay -c member_stop_payment_request -i member_id=100731 -i check_number=884 -i check_amount='$91.40' -i requested_by='R. Okafor' --operator scripted
+```
+
+```text
+[success] member_stop_payment_request v1.0.0 — stop_payment_reference=SP-100731-884-32, request_status=RECORDED
+  human actions recorded: 3
+    - clicked the 'Place Stop Payment' button
+```
+
 Then, if you want:
 
 ```bash
 ./scripts/test.sh
 ```
 
-119 tests in about 75 seconds, none of which call a model: schema and
+134 tests in about 75 seconds, none of which call a model: schema and
 validation, templating and typed coercion, locator resolution and candidate
 generation, predicate evaluation, the safety gate and redactor, the control
-state machine and operator console, synthesis, the catalog, and ten
-browser-backed end-to-end replays covering every runtime-condition category.
+state machine and operator console, synthesis, the catalog, replay pre-flight,
+fault staging, and ten browser-backed end-to-end replays covering every
+runtime-condition category.
 
 ---
 
@@ -205,6 +225,43 @@ scripted stand-in operator so it needs no interaction — see
 The first emits JSON-schema tool definitions; the second invokes the capability
 by name and returns a typed JSON result.
 
+**6 — The write path: a state-changing flow that needs a person.** ~15s each.
+Recording it is a separate discovery run against a separate capability id:
+
+```bash
+.venv/bin/cua discover --task tasks/member_stop_payment.yaml
+```
+
+The goal ends on a confirmation screen, so the flow has a committing control.
+Under the default profile that control is human-only, and the recorded artifact
+says so in `safety.steps_requiring_approval` — an unattended replay pauses for
+an operator before anything is recorded against the member:
+
+```bash
+.venv/bin/cua replay -c member_stop_payment_request -i member_id=100731 -i check_number=884 -i check_amount='$91.40' -i requested_by='R. Okafor' --operator scripted
+```
+
+The same capability under a second institution's profile, which classifies a
+stop payment as irreversible rather than merely approval-worthy, does every
+harmless step and then refuses:
+
+```bash
+.venv/bin/cua replay -c member_stop_payment_request -i member_id=100244 -i check_number=2041 -i check_amount='$482.60' -i requested_by='T. Alvarez' --allowlist-profile no_unattended_writes --operator scripted
+```
+```text
+[blocked_by_policy] … policy_risk_ceiling at step s11_submit_stop_payment_request
+```
+
+And the two runtime conditions that need a staged fault — a session timeout that
+rewinds the flow to sign-on, and a slow host the declared waits absorb:
+
+```bash
+.venv/bin/cua inject expire && .venv/bin/cua replay -c member_stop_payment_request -i member_id=100244 -i check_number=2041 -i check_amount='$482.60' -i requested_by='T. Alvarez' --operator scripted
+```
+```bash
+.venv/bin/cua inject slow && .venv/bin/cua replay -c member_savings_balance_lookup -i member_id=100244 ; .venv/bin/cua inject none
+```
+
 ---
 
 ## Verifying that replay really uses no model
@@ -326,7 +383,7 @@ broke. That is usually faster than re-running with more logging.
 |---|---|
 | `cua serve-app` | Run the MeridianCore mock console. |
 | `cua discover --task <yaml>` | LLM-driven discovery → artifact. The only command that uses a model. |
-| `cua replay -c <capability> -i k=v` | Deterministic replay. `--operator scripted\|console\|none`, `--headed`, `--json`. |
+| `cua replay -c <capability> -i k=v` | Deterministic replay. `--operator scripted\|console\|none`, `--allowlist-profile`, `--headed`, `--json`. |
 | `cua invoke <capability> -i k=v` | Agent-style invocation; typed JSON result. Refuses drafts unless `--allow-draft`. |
 | `cua approve <capability> -i k=v` | Verify by replaying, then promote draft → approved. |
 | `cua catalog list` / `catalog tools` / `catalog show <id>` | What an agent can call, and its tool schema. |
@@ -353,7 +410,8 @@ src/cua/
   catalog/      artifacts projected as agent-callable tools.
 mockapp/        the MeridianCore legacy console.
 tasks/          discovery task definitions.
-config/         allowlist profiles.
+config/         allowlist profiles — `default`, and a second-tenant profile
+                that refuses the same capability's commit.
 artifacts/      the capability store (JSON, reviewable in diffs).
 evidence/       discovery and replay evidence.
 ```

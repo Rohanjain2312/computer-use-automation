@@ -1,11 +1,15 @@
 # Evidence
 
 Everything here was produced by running the system, not by hand. Paths are
-exactly as the tools wrote them.
+exactly as the tools wrote them. Reproduce the machine-driven parts with
+`./scripts/demo.sh` (needs `ANTHROPIC_API_KEY`), or everything except the
+discovery runs with `./scripts/replay.sh` (needs no model access, because replay
+never uses one).
 
-Everything here was produced by running the system. Reproduce the machine-driven parts with `./scripts/demo.sh` (needs `ANTHROPIC_API_KEY`), or
-everything except the discovery run with `./scripts/replay.sh` (needs no model
-access, because replay never uses one).
+Two capabilities were recorded, each by its own real discovery run:
+`member_savings_balance_lookup` reads, and `member_stop_payment_request` writes
+and ends on a confirmation screen. Between them, `/evidence/` contains a run for
+each of the five result statuses and for all seven runtime conditions in §3.3.
 
 Redaction on the way out, stated precisely:
 
@@ -13,9 +17,21 @@ Redaction on the way out, stated precisely:
   override code are registered with the redactor before the run starts, and
   secret input fields are masked with an opaque overlay *before* each screenshot
   is taken.
-* **Replay evidence carries no PII.** Outputs typed `pii` are returned to the
-  caller and redacted in everything written to disk; an end-to-end test asserts
-  the member name is absent from `result.json`.
+* **Replay redacts every value the capability declares.** Inputs and outputs
+  typed `pii` are registered with the redactor and scrubbed from everything
+  written to disk — `result.json`, the run log, the snapshots, the intervention
+  record. An end-to-end test asserts that a declared `pii` value appears in *no*
+  file a run writes, not merely in `result.json`.
+* **It cannot redact what the capability never declares.** The redactor replaces
+  registered values; a member name is not a pattern, so it is scrubbed only
+  because `member_savings_balance_lookup` declares `member_name` as a `pii`
+  output. `member_stop_payment_request` does not declare it, and its request
+  form displays one — so that name survives in that capability's DOM and
+  accessibility snapshots and in its intervention excerpts. It is fixture data
+  that also sits in `mockapp/data.py` in plain source, so nothing is exposed
+  here that the repository does not already contain; the general lesson is that
+  a capability should declare the sensitive fields its screens *show*, not only
+  the ones it returns. See `REPORT.md` § Safety and `DECISIONS.md` D14.
 * **Discovery evidence necessarily contains what was on screen.** Discovery is
   where sensitivity is *learned* — the agent classifies `member_name` as `pii`
   partway through the run, and from that moment the value is registered and
@@ -26,7 +42,7 @@ Redaction on the way out, stated precisely:
 
 ---
 
-## 1. The real discovery run
+## 1. The first discovery run (the lookup capability)
 
 `discovery/disc_20260918T005508Z_f20099/`
 
@@ -64,7 +80,7 @@ appears — the note is in `provenance.notes`.
 
 ---
 
-## 2. The artifact
+## 2. The lookup artifact
 
 `artifacts/member_savings_balance_lookup.v1.0.0.json` (the live copy is
 `/artifacts/member_savings_balance_lookup/v1.0.0.json`)
@@ -87,13 +103,13 @@ Worth looking at:
 * **`inputs[1]`** (`operator_passcode`) — `sensitivity: secret`,
   `source: environment`. The artifact says where to type it, never what it is.
 
-`artifacts/capability_tools.json` is the same artifact projected into a
-JSON-schema tool definition for a calling agent. Note that the credential inputs
-are absent: an agent cannot pass them and should not know they exist.
+`artifacts/capability_tools.json` is **both** artifacts projected into JSON-schema
+tool definitions for a calling agent. Note that the credential inputs are absent:
+an agent cannot pass them and should not know they exist.
 
 ---
 
-## 3. Replay runs
+## 3. Its replay runs
 
 No model is consulted in any of these — `result.json` records `llm_used: false`.
 
@@ -183,3 +199,125 @@ so real work went unrecorded while the run still reported success. Silent loss
 of evidence is worse than a loud failure, so the recorder is now installed the
 moment the session pauses, and actions taken before the formal takeover are
 recorded and flagged. `tests/test_handoff.py` covers both orderings.
+
+---
+
+## 4. The second capability: a state-changing flow
+
+The lookup capability reads. This one writes, and ends on a confirmation screen
+with a host reference number — which is where the risk model, the approval gate
+and the handoff seam actually bite rather than being argued for.
+
+### 4a. Its discovery run
+
+`discovery/disc_20260918T173119Z_b077a3/`
+
+| | |
+|---|---|
+| Model | `claude-sonnet-5`, 32 calls |
+| Tokens | 705,251 in / 7,988 out |
+| Phases | `goal` (12 actions), `probe` (11), `probe_app_error` (4), `probe_expire` (1) |
+| Screenshots | 69 |
+| Accessibility snapshots | 28 |
+| Escalations | 3 |
+| Result | goal completed via an operator handoff; every declared rule grounded in observed wording |
+
+Three things in this run are worth reading the log for.
+
+**The agent could not commit the flow itself.** At `s11` it reached for
+`Place Stop Payment`, and the gate refused it:
+
+```
+policy_check  reason=control 'Place Stop Payment' is marked human-only
+              by profile 'default'; automation must hand off
+```
+
+An operator performed it on the same live session, the run resumed, and — this
+is the part that matters — **the action was still recorded as a step**, tagged
+`needs_human`. That tag is what becomes
+`safety.steps_requiring_approval: ["s11_submit_stop_payment_request"]` in the
+artifact. Dropping the step instead would have produced a capability that
+silently skips its own committing action (`DECISIONS.md` D15).
+
+**The agent was refused outright when it reached for money movement.** A probe
+asked it to attempt the `Transfer Funds` control that sits on the same screen.
+The gate blocked it rather than escalating, and the agent stopped:
+
+```
+policy_check  reason=irreversible_write action is blocked by profile 'default'
+              (policy='block'); ceiling is reversible_write
+```
+
+**Mutually exclusive faults each got their own phase.** An application error and
+a session expiry cannot both be true of one request, so the task declares a list
+of `fault_rehearsal` entries and the platform stages one per phase — visible in
+the log as `sandbox_fault_staged` at the start of `probe_app_error` and
+`probe_expire`. That is how the session-expiry recovery rule below came to
+exist: the agent had to *see* the expiry screen to quote it.
+
+### 4b. Its artifact
+
+`artifacts/member_stop_payment_request.v1.0.0.json`
+
+12 steps · 6 typed inputs · 2 typed outputs · 2 business outcomes · 2 recovery
+rules · 1 failure rule · `status: approved`.
+
+* **`safety.steps_requiring_approval`** is non-empty — the first artifact here
+  for which it is. A reviewer sees before running it that the capability cannot
+  commit unattended.
+* **`recovery_rules[1]`** (`session_timeout`) carries
+  `then: resume_from_step, resume_from_step: s00_open`. An expired session
+  invalidates everything the flow established, so the only correct recovery is
+  to restart from the entry point — the semantics argued for in `REPORT.md`
+  § Determinism and `DECISIONS.md` D6, now exercised by a real artifact rather
+  than only a fixture.
+* **`success_condition`** asserts arrival at the confirmation screen, not merely
+  that a value was readable.
+* **`inputs[5]`** (`requested_by`) is `sensitivity: pii` and caller-sourced.
+
+### 4c. Its replay runs
+
+| Run | Status | What it demonstrates |
+|---|---|---|
+| `replay_smoke_…496ef5` | `success` | The approval replay `cua discover` runs; its id is in the artifact's `verification`. |
+| `replay_sp_happy_…adf8cc` | `success` | A **different member, check and amount** than the recording used — `SP-100731-884-32`. Parameterized, not a transcript. Escalates at the commit, an operator clicks it, the run resumes and reads the reference back. |
+| `replay_sp_not_found_…68a712` | `business_outcome` | `member_not_found` on the write path too. Nothing was recorded against anyone. |
+| `replay_sp_bad_input_…70e723` | `invalid_input` | `check_number=abcd` fails its declared pattern. Rejected before the application is touched. |
+| `replay_sp_blocked_…64184a` | `blocked_by_policy` | The same artifact under `--allowlist-profile no_unattended_writes`. Every harmless step runs; the commit is refused. |
+| `replay_sp_app_error_…035f07` | `failure` | Category C on the write path: a staged host fault at the search step, with expected/observed and three snapshots. |
+| `replay_sp_expiry_…8a51e5` | `success` | **Session expiry.** The recovery rule fires, `flow_rewound … resuming from 's00_open'`, the run signs on again, clears the interstitial, and completes. |
+| `replay_invoke_…f9f239` | `failure` | Invoked by an agent with **no operator channel**. It refuses to commit and says why, rather than proceeding: `intervention int_… was raised but no operator channel is configured for this run`. |
+
+### 4d. The blocked run, in detail
+
+`replay_sp_blocked_20260918T173556Z_64184a/result.json`
+
+`config/allowlist.yaml` carries a second profile for the same vendor product,
+standing in for an institution that classifies recording a stop payment as
+irreversible rather than merely approval-worthy. The capability is unchanged;
+only the policy is:
+
+```json
+{ "error_class": "policy_risk_ceiling",
+  "step_id": "s11_submit_stop_payment_request",
+  "observed": "irreversible_write action (control label matches irreversible
+               marker 'place stop payment'; live control re-escalated risk
+               above the declared 'reversible_write')" }
+```
+
+That `live control re-escalated risk above the declared` clause is the
+risk-computed-twice model (`DECISIONS.md` D7) working end to end: the artifact
+declared the step `reversible_write`, the gate re-derived `irreversible_write`
+from the label on screen, and the stricter answer won. Until now that was only a
+unit test.
+
+---
+
+## 5. The two remaining runtime conditions
+
+§3.3 lists seven. Five appear above; these two needed a staged fault.
+
+| Condition | Run | What happens |
+|---|---|---|
+| Session / timeout expiry | `replay_sp_expiry_…8a51e5` | The `session_timeout` recovery rule matches the "Session Ended" screen and rewinds the flow to `s00_open` rather than retrying the step that noticed. The run then completes normally. |
+| Transient slowness | `replay_slow_load_…e0468e` | `cua inject slow` delays the accounts frame by ~9s. The step's declared wait absorbs it — `s06` takes 9,750 ms instead of ~1,000 — and the run still returns `4812.37`. Latency, not a failure, because a wait is a condition with a timeout and never a fixed sleep. |

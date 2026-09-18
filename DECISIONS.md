@@ -259,3 +259,137 @@ that infrastructure breadth is not rewarded.
 browser sessions, with the CLI's `_replay` becoming an RPC entry point; the
 operator console becoming a shared web app reading the same intervention inbox
 that `handoff/intervention.py` already writes to. Neither changes the engine.
+
+---
+
+## D12 — Checkpoint failure re-runs the condition scan before failing
+
+**Decision.** When a step's checkpoint does not hold, the engine re-runs the
+business-outcome / recovery / failure scan *before* treating the step as failed.
+And because a scan can itself change the page, the scan reports whether it did,
+and the engine re-observes before deciding anything.
+
+**Why.** The commonest reason a checkpoint fails is not that the automation
+broke — it is that the application answered something legitimate instead. The
+step "search for the member" expects an account summary; what it gets is "No
+member matching that number was found." Failing there would report a crash for
+the single most ordinary result in the flow, which is the mistake the assignment
+glossary names explicitly.
+
+**How it was found.** Both halves came from real bugs during development, not
+from foresight. The first ordering — scan, then act on the stale observation —
+made a run that a recovery rule had just fixed fail anyway, because the engine
+was still looking at the pre-recovery screen. The second — treating a failed
+checkpoint as terminal without re-scanning — reported `member_not_found` runs as
+hard failures. The end-to-end tests now pin both.
+
+**Cost.** One extra observation on the failure path, and a scan that must be
+idempotent enough to run twice. Both are cheap; the alternative is a result
+contract that lies.
+
+---
+
+## D13 — The human-action recorder installs when the session pauses, not at takeover
+
+**Decision.** Capture-phase listeners go into every reachable document the moment
+a run pauses for a human, not when the operator presses *Take control*. Actions
+taken before the formal takeover are recorded and flagged `before_takeover`, and
+*Release & resume* works even if control was never formally taken.
+
+**Why.** The obvious design — install on takeover — loses work silently. A
+person who walks up to a parked browser, sees the problem, and fixes it before
+touching the console has done real work on the live session and had it recorded
+nowhere, while the run still reports success. Silent loss of evidence is worse
+than a loud failure: the run log would claim automation reached a state that a
+human actually produced.
+
+**What did not change.** The control *state machine*. Ownership still transfers
+explicitly, `assert_can_act()` still refuses automation while a human holds the
+session, and the `ControlViolation` test still passes. Only the record now
+reflects what happened to the session rather than what the button sequence
+implied.
+
+**Cost.** Actions can be attributed to the human that were arguably side effects
+of automation's own earlier input — a `change` event firing on blur, for
+instance. Over-attribution to the person who was present is the safer direction.
+
+---
+
+## D14 — The limit of redaction during discovery, stated exactly
+
+**Decision.** Discovery runs against synthetic fixture data, and the weaker
+redaction guarantee during discovery is documented rather than papered over.
+
+**Why it is weaker.** Discovery is where sensitivity is *learned*. The agent
+classifies `member_name` as `pii` partway through a run; from that moment the
+value is registered and masked in everything written afterwards. Anything
+captured *before* that declaration — screenshots, the observation text the model
+was shown, the accessibility snapshot — still contains it. You cannot redact a
+field you have not yet classified, and a screenshot shows it regardless of any
+pattern.
+
+**Consequence.** A recording run belongs in a sandbox with seeded records, not
+against live member data, and this repository's discovery runs use fixtures for
+exactly that reason.
+
+**Replay is stronger, but not unconditional.** Sensitivity is declared in the
+artifact before the run starts, so every persistence path is covered from step 0
+— for the values the artifact *declares*. Redaction works by replacing
+registered values, and a person's name matches no pattern, so it is scrubbed
+only because something typed it `pii`. This is not hypothetical: the two
+capabilities here differ on exactly that point.
+`member_savings_balance_lookup` declares `member_name` as a `pii` output, so it
+is registered and absent from every file its runs write.
+`member_stop_payment_request` declares the `requested_by` input as `pii` (also
+scrubbed) but never declares the member name its request form displays — so that
+name survives in that capability's DOM and accessibility snapshots and in its
+intervention excerpts.
+
+**What follows from it.** A capability should declare the sensitive fields its
+screens *show*, not only the ones it returns to the caller. The rule is
+recording-time discipline rather than something the engine can infer, because
+the engine cannot know that a string in a table cell is a person. What the
+engine *can* do is enforce the declared case, and
+`tests/test_replay_e2e.py` now asserts a declared `pii` value appears in no file
+a run writes — the earlier version of that test only checked `result.json`,
+which would have passed while the snapshot beside it named the member.
+
+**What would close it.** Classifying fields from the app profile before the run
+rather than during it — a per-app field registry, which is the same artifact the
+risk model wants in D7. Until that exists, the honest position is that discovery
+is a sandbox activity.
+
+---
+
+## D15 — A step the gate refuses to automation is still recorded
+
+**Decision.** When the policy gate returns `requires_human` during discovery and
+an operator performs the action on the live session, the action is recorded as a
+step, tagged `needs_human`, and the tag becomes
+`safety.steps_requiring_approval` in the artifact.
+
+**Alternatives.**
+
+| Option | Why not |
+|---|---|
+| Drop the escalated action from the recording (the original behaviour) | The capability silently loses its own committing step. Replay would run every harmless step and then stop short, and the artifact would not show a reviewer that the flow needs a person at all. |
+| Let discovery perform the risky action itself and mark it afterwards | Discovery would be acting outside the allowlist, which is the one property the gate exists to make structural. |
+| Have the task YAML declare which step needs approval | Moves a safety fact from the policy into the recording request, which is the wrong place: the same flow recorded under a stricter profile should need approval without anyone remembering to say so. |
+
+**Why this one.** The action genuinely happened on the flow's critical path, so
+the recording should contain it; and the reason it needed a person is a property
+of the profile, which the gate already knows at the moment it refuses. Deriving
+the tag from the refusal means the artifact's approval list and the runtime
+behaviour cannot disagree.
+
+**What it buys, concretely.** `member_stop_payment_request` carries
+`steps_requiring_approval: ["s11_submit_stop_payment_request"]`. A reviewer sees
+before running it that the capability cannot commit unattended; an unattended
+`cua invoke` fails cleanly instead of committing; and `cua replay --operator`
+routes to the same handoff machinery the entitlement block already used, rather
+than a second approval path.
+
+**Cost.** The recorded step's evidence is captured after the operator acted, so
+its "before" observation is the paused screen rather than the screen the
+automation itself last produced. For a step automation is never going to perform
+unattended, that is the more useful record anyway.
