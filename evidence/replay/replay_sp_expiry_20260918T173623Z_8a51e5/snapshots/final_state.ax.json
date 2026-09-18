@@ -1,0 +1,1011 @@
+{
+  "url": "http://127.0.0.1:8799/",
+  "title": "MeridianCore Servicing Console",
+  "captured_at": "2026-09-18T17:36:44.310Z",
+  "frames": [
+    {
+      "name": "navpane",
+      "path": "navpane",
+      "src": "/nav",
+      "url": "http://127.0.0.1:8799/nav",
+      "accessible": true,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 900
+      }
+    },
+    {
+      "name": "bodypane",
+      "path": "bodypane",
+      "src": "/content",
+      "url": "http://127.0.0.1:8799/members/100244/stoppay",
+      "accessible": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 900
+      }
+    }
+  ],
+  "text": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Stop Payment Confirmation\nStop Payment Recorded\nThe request has been accepted by the host. Give the reference below to the member.\nReference Number SP-100244-2041-18\nRequest Status RECORDED\nMember Number 100244\nDraft Account ****4417\nCheck Number 2041\nCheck Amount $482.60\nReason Check lost or stolen\nRequested By [REDACTED]:input",
+  "nodes": [
+    {
+      "ref": "n0",
+      "role": "button",
+      "name": "Dashboard",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Dashboard",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 48,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Servicing v7.2.1"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n1",
+      "role": "button",
+      "name": "Member Servicing",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 75,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Dashboard"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n2",
+      "role": "button",
+      "name": "Card Services",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Card Services",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 102,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Member Servicing"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n3",
+      "role": "button",
+      "name": "Batch Posting",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Batch Posting",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 129,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Card Services"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n4",
+      "role": "button",
+      "name": "Sign Off",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Sign Off",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 156,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Batch Posting"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n5",
+      "role": "cell",
+      "name": "Member Servicing \u2014 Stop Payment Confirmation",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing \u2014 Stop Payment Confirmation",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 27
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Member Servicing \u2014 Stop Payment Confirmation",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n6",
+      "role": "cell",
+      "name": "Stop Payment Recorded",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Stop Payment Recorded",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 52,
+        "width": 558,
+        "height": 28
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Stop Payment Recorded",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n7",
+      "role": "cell",
+      "name": "The request has been accepted by the host. Give the reference below to the member.",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "The request has been accepted by the host. Give the reference below to the member.",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 80,
+        "width": 558,
+        "height": 28.5
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Stop Payment Recorded"
+      ],
+      "label_left": "",
+      "label_above": "Stop Payment Recorded",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "The request has been accepted by the host. Give the reference below to the member.",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n8",
+      "role": "cell",
+      "name": "Reference Number",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Reference Number",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 108.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "The request has been accepted by the host. Give the reference below to the member."
+      ],
+      "label_left": "",
+      "label_above": "The request has been accepted by the host. Give the reference below to the member.",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 2,
+        "col_index": 0,
+        "row_label": "Reference Number",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n9",
+      "role": "cell",
+      "name": "SP-100244-2041-18",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "SP-100244-2041-18",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 108.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Reference Number"
+      ],
+      "label_left": "Reference Number",
+      "label_above": "",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 2,
+        "col_index": 1,
+        "row_label": "Reference Number",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n10",
+      "role": "cell",
+      "name": "Request Status",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Request Status",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 134.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Reference Number"
+      ],
+      "label_left": "",
+      "label_above": "Reference Number",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 3,
+        "col_index": 0,
+        "row_label": "Request Status",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n11",
+      "role": "cell",
+      "name": "RECORDED",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "RECORDED",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 134.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Request Status",
+        "SP-100244-2041-18"
+      ],
+      "label_left": "Request Status",
+      "label_above": "SP-100244-2041-18",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 3,
+        "col_index": 1,
+        "row_label": "Request Status",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n12",
+      "role": "cell",
+      "name": "Member Number",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Number",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 160.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Request Status"
+      ],
+      "label_left": "",
+      "label_above": "Request Status",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 4,
+        "col_index": 0,
+        "row_label": "Member Number",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n13",
+      "role": "cell",
+      "name": "100244",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "100244",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 160.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Number",
+        "RECORDED"
+      ],
+      "label_left": "Member Number",
+      "label_above": "RECORDED",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 4,
+        "col_index": 1,
+        "row_label": "Member Number",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n14",
+      "role": "cell",
+      "name": "Draft Account",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Draft Account",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 186.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Member Number"
+      ],
+      "label_left": "",
+      "label_above": "Member Number",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 5,
+        "col_index": 0,
+        "row_label": "Draft Account",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n15",
+      "role": "cell",
+      "name": "****4417",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "****4417",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 186.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Draft Account",
+        "100244"
+      ],
+      "label_left": "Draft Account",
+      "label_above": "100244",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 5,
+        "col_index": 1,
+        "row_label": "Draft Account",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n16",
+      "role": "cell",
+      "name": "Check Number",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Check Number",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 212.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Draft Account"
+      ],
+      "label_left": "",
+      "label_above": "Draft Account",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 6,
+        "col_index": 0,
+        "row_label": "Check Number",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n17",
+      "role": "cell",
+      "name": "2041",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "2041",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 212.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Check Number",
+        "****4417"
+      ],
+      "label_left": "Check Number",
+      "label_above": "****4417",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 6,
+        "col_index": 1,
+        "row_label": "Check Number",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n18",
+      "role": "cell",
+      "name": "Check Amount",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Check Amount",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 238.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Check Number"
+      ],
+      "label_left": "",
+      "label_above": "Check Number",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 7,
+        "col_index": 0,
+        "row_label": "Check Amount",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n19",
+      "role": "cell",
+      "name": "$482.60",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "$482.60",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 238.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Check Amount",
+        "2041"
+      ],
+      "label_left": "Check Amount",
+      "label_above": "2041",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 7,
+        "col_index": 1,
+        "row_label": "Check Amount",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n20",
+      "role": "cell",
+      "name": "Reason",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Reason",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 264.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Check Amount"
+      ],
+      "label_left": "",
+      "label_above": "Check Amount",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 8,
+        "col_index": 0,
+        "row_label": "Reason",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n21",
+      "role": "cell",
+      "name": "Check lost or stolen",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Check lost or stolen",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 264.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Reason",
+        "$482.60"
+      ],
+      "label_left": "Reason",
+      "label_above": "$482.60",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 8,
+        "col_index": 1,
+        "row_label": "Reason",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n22",
+      "role": "cell",
+      "name": "Requested By",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Requested By",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 454.5,
+        "y": 290.5,
+        "width": 193.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Reason"
+      ],
+      "label_left": "",
+      "label_above": "Reason",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 9,
+        "col_index": 0,
+        "row_label": "Requested By",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n23",
+      "role": "cell",
+      "name": "[REDACTED]:input",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "[REDACTED]:input",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 648,
+        "y": 290.5,
+        "width": 364.5,
+        "height": 26
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Requested By",
+        "Check lost or stolen"
+      ],
+      "label_left": "Requested By",
+      "label_above": "Check lost or stolen",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 9,
+        "col_index": 1,
+        "row_label": "Requested By",
+        "col_header": "SP-100244-2041-18",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n24",
+      "role": "button",
+      "name": "Return to Member",
+      "name_source": "value-attr",
+      "value": "Return to Member",
+      "text": "",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 891.3,
+        "y": 325,
+        "width": 112.2,
+        "height": 20
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Requested By"
+      ],
+      "label_left": "",
+      "label_above": "Requested By",
+      "table": {
+        "headers": [
+          "Reference Number",
+          "SP-100244-2041-18"
+        ],
+        "row_index": 10,
+        "col_index": 0,
+        "row_label": "",
+        "col_header": "Reference Number",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "input",
+        "css": "input",
+        "name_attr": "",
+        "id": ""
+      }
+    }
+  ]
+}

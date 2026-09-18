@@ -49,6 +49,70 @@
       ],
       "path": "artifacts/member_savings_balance_lookup/v1.0.0.json",
       "checksum": "sha256:357ab9f9b3fe75edb3e0715d3d12c7812d5d5f20e9cfd67f4fc328fc589dde93"
+    },
+    {
+      "capability_id": "member_stop_payment_request",
+      "version": "1.0.0",
+      "name": "Member stop payment request",
+      "status": "approved",
+      "description": "Record a stop payment against a member's share draft in the MeridianCore servicing console and return the host reference number from the confirmation screen. The committing control is human-only under the default safety profile, so an unattended replay pauses for an operator before the request is recorded.",
+      "surface": "web",
+      "tenant": "riverbend_cu",
+      "variant": "base",
+      "inputs": [
+        {
+          "name": "operator_id",
+          "type": "string",
+          "required": true,
+          "source": "environment"
+        },
+        {
+          "name": "operator_passcode",
+          "type": "string",
+          "required": true,
+          "source": "environment"
+        },
+        {
+          "name": "member_id",
+          "type": "string",
+          "required": true,
+          "source": "caller"
+        },
+        {
+          "name": "check_number",
+          "type": "string",
+          "required": true,
+          "source": "caller"
+        },
+        {
+          "name": "check_amount",
+          "type": "string",
+          "required": true,
+          "source": "caller"
+        },
+        {
+          "name": "requested_by",
+          "type": "string",
+          "required": true,
+          "source": "caller"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "stop_payment_reference",
+          "type": "string"
+        },
+        {
+          "name": "request_status",
+          "type": "string"
+        }
+      ],
+      "business_outcomes": [
+        "member_not_found",
+        "invalid_check_number_format"
+      ],
+      "path": "artifacts/member_stop_payment_request/v1.0.0.json",
+      "checksum": "sha256:86b2908852146d7ccc06bcf849fc62d8410e82062545fd00ad7cf7e2e47f94c7"
     }
   ]
 }

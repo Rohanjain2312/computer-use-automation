@@ -1,0 +1,184 @@
+{
+  "run_id": "replay_sp_app_error_20260918T173614Z_035f07",
+  "capability_id": "member_stop_payment_request",
+  "capability_version": "1.0.0",
+  "status": "failure",
+  "started_at": "2026-09-18T17:36:15.072Z",
+  "finished_at": "2026-09-18T17:36:23.240Z",
+  "duration_ms": 8167,
+  "inputs_echo": {
+    "operator_id": "[REDACTED]:input",
+    "operator_passcode": "[REDACTED]",
+    "member_id": "100244",
+    "check_number": "2041",
+    "check_amount": "$482.60",
+    "requested_by": "[REDACTED]:input"
+  },
+  "outputs": {},
+  "outcome": null,
+  "failure": {
+    "error_class": "host_system_error",
+    "message": "When submitting the Stop Payment request while the host is in a fault state, the console displays an \"Application Error\" dialog with the title \"SYSTEM ERROR MC-5001\" and body text \"The host transaction could not be completed. Contact the service desk with this reference.\" This is a genuine application/host fault, not a business outcome \u2014 the run must stop and be treated as failed/incomplete rather than as a successfully recorded stop payment, since no Reference Number or Request Status confirmation is produced.",
+    "step_id": "s06_search_member_record",
+    "step_index": 6,
+    "step_intent": "Search for the member record",
+    "expected": "the application to continue the flow normally",
+    "observed": "ign Off --- Application Error SYSTEM ERROR MC-5001  The host transaction could not be comp",
+    "observed_url": "http://127.0.0.1:8799/",
+    "locator_attempts": [],
+    "recovery_attempts": [],
+    "evidence": [
+      "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/007_fail_apperr_s06_search_member_record.png",
+      "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/snapshots/fail_apperr_s06_search_member_record.ax.json",
+      "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/snapshots/fail_apperr_s06_search_member_record.dom.html"
+    ]
+  },
+  "steps": [
+    {
+      "id": "s00_open",
+      "index": 0,
+      "intent": "Open the servicing console entry point",
+      "action": "navigate",
+      "status": "ok",
+      "duration_ms": 661,
+      "strategy_used": null,
+      "strategy_confidence": null,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "role_name {'role': 'textbox', 'name': 'Operator ID'} matched 1 control(s) (expected >=1)",
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/001_00_s00_open.png"
+      ]
+    },
+    {
+      "id": "s01_enter_operator_sign_id",
+      "index": 1,
+      "intent": "Enter the operator sign-on id",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1178,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/002_01_s01_enter_operator_sign_id.png"
+      ]
+    },
+    {
+      "id": "s02_enter_operator_passcode",
+      "index": 2,
+      "intent": "Enter the operator passcode",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1397,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/003_02_s02_enter_operator_passcode.png"
+      ]
+    },
+    {
+      "id": "s03_sign_servicing_console",
+      "index": 3,
+      "intent": "Sign on to the servicing console",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 1005,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Select a function from the navigation pane.' found on screen (expected present)",
+      "risk": "reversible_write",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/004_03_s03_sign_servicing_console.png"
+      ]
+    },
+    {
+      "id": "s04_open_member_servicing_look_up_memb",
+      "index": 4,
+      "intent": "Open Member Servicing to look up the member",
+      "action": "click",
+      "status": "recovered",
+      "duration_ms": 1544,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Member Servicing \u2014 Inquiry' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [
+        "recovered via 'system_maintenance_notice' (attempt 1)"
+      ],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/005_04_s04_open_member_servicing_look_up_memb.png"
+      ]
+    },
+    {
+      "id": "s05_enter_member_number_look_up",
+      "index": 5,
+      "intent": "Enter the member number to look up",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1132,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/screens/006_05_s05_enter_member_number_look_up.png"
+      ]
+    }
+  ],
+  "recoveries": [
+    {
+      "rule": "system_maintenance_notice",
+      "step_id": "s04_open_member_servicing_look_up_memb",
+      "attempt": 1,
+      "during": "wait",
+      "applied": true,
+      "then": "retry_step",
+      "detail": "After signing on and before the first Member Servicing search, a \"System Notice\" interstitial appears announcing a scheduled maintenance window. It is shown once per sign-on and is cleared by clicking the \"Acknowledge and Continue\" button, after which the requested Member Servicing screen loads normally."
+    }
+  ],
+  "escalations": [],
+  "control_log": [
+    {
+      "at": "2026-09-18T17:36:14.649Z",
+      "kind": "session_opened",
+      "from_owner": null,
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run started",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-18T17:36:23.240Z",
+      "kind": "session_failed",
+      "from_owner": "automation",
+      "to_owner": null,
+      "state": "failed",
+      "reason": "When submitting the Stop Payment request while the host is in a fault state, the console displays an \"Application Error\" dialog with the title \"SYSTEM ERROR MC-5001\" and body text \"The host transaction could not be completed. Contact the service desk with this reference.\" This is a genuine application/host fault, not a business outcome \u2014 the run must stop and be treated as failed/incomplete rather than as a successfully recorded stop payment, since no Reference Number or Request Status confirmation is produced.",
+      "actor": "system"
+    }
+  ],
+  "human_actions": [],
+  "llm_used": false,
+  "evidence_dir": "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07",
+  "log_path": "evidence/replay/replay_sp_app_error_20260918T173614Z_035f07/run.jsonl"
+}

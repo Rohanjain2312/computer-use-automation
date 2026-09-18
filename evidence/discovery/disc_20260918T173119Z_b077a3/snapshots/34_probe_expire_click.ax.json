@@ -1,0 +1,303 @@
+{
+  "url": "http://127.0.0.1:8799/",
+  "title": "MeridianCore Servicing Console",
+  "captured_at": "2026-09-18T17:33:42.689Z",
+  "frames": [
+    {
+      "name": "navpane",
+      "path": "navpane",
+      "src": "/nav",
+      "url": "http://127.0.0.1:8799/nav",
+      "accessible": true,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 900
+      }
+    },
+    {
+      "name": "bodypane",
+      "path": "bodypane",
+      "src": "/content",
+      "url": "http://127.0.0.1:8799/members",
+      "accessible": true,
+      "rect": {
+        "x": 187,
+        "y": 0,
+        "width": 1093,
+        "height": 900
+      }
+    }
+  ],
+  "text": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nSession Ended\nYour session has expired.\n\nSign on again to continue.",
+  "nodes": [
+    {
+      "ref": "n0",
+      "role": "button",
+      "name": "Dashboard",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Dashboard",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 48,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Servicing v7.2.1"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n1",
+      "role": "button",
+      "name": "Member Servicing",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Member Servicing",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 75,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Dashboard"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n2",
+      "role": "button",
+      "name": "Card Services",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Card Services",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 102,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Member Servicing"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n3",
+      "role": "button",
+      "name": "Batch Posting",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Batch Posting",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 129,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Card Services"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n4",
+      "role": "button",
+      "name": "Sign Off",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Sign Off",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 0,
+        "y": 156,
+        "width": 186,
+        "height": 27
+      },
+      "frame_path": "navpane",
+      "frame_name": "navpane",
+      "label_candidates": [
+        "Batch Posting"
+      ],
+      "label_left": "",
+      "label_above": "",
+      "table": null,
+      "dom_hint": {
+        "tag": "div",
+        "css": "div",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n5",
+      "role": "cell",
+      "name": "Session Ended",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Session Ended",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 514.5,
+        "y": 61,
+        "width": 438,
+        "height": 28
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [],
+      "label_left": "",
+      "label_above": "",
+      "table": {
+        "headers": [],
+        "row_index": 0,
+        "col_index": 0,
+        "row_label": "Session Ended",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n6",
+      "role": "cell",
+      "name": "Your session has expired. Sign on again to continue.",
+      "name_source": "inner-text",
+      "value": "",
+      "text": "Your session has expired. Sign on again to continue.",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 514.5,
+        "y": 89,
+        "width": 438,
+        "height": 81
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Session Ended"
+      ],
+      "label_left": "",
+      "label_above": "Session Ended",
+      "table": {
+        "headers": [],
+        "row_index": 1,
+        "col_index": 0,
+        "row_label": "Your session has expired. Sign on again to continue.",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "td",
+        "css": "td",
+        "name_attr": "",
+        "id": ""
+      }
+    },
+    {
+      "ref": "n7",
+      "role": "button",
+      "name": "Return to Sign On",
+      "name_source": "value-attr",
+      "value": "Return to Sign On",
+      "text": "",
+      "enabled": true,
+      "secret": false,
+      "in_viewport": true,
+      "rect": {
+        "x": 832.5,
+        "y": 178,
+        "width": 111,
+        "height": 20
+      },
+      "frame_path": "bodypane",
+      "frame_name": "bodypane",
+      "label_candidates": [
+        "Your session has expired. Sign on again to continue."
+      ],
+      "label_left": "",
+      "label_above": "Your session has expired. Sign on again to continue.",
+      "table": {
+        "headers": [],
+        "row_index": 2,
+        "col_index": 0,
+        "row_label": "",
+        "col_header": "",
+        "header_confident": false
+      },
+      "dom_hint": {
+        "tag": "input",
+        "css": "input",
+        "name_attr": "",
+        "id": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,970 @@
+{
+  "run_id": "disc_20260918T173119Z_b077a3",
+  "goal": "Sign on to the MeridianCore servicing console and open Member Servicing. Look up the member whose number is given by the member_id input. From that member's record, open Stop Payment. On the request form, leave the Draft Account at the account already selected, enter the Check Number, the Check Amount and the Requested By name from the inputs of the same names, and choose the reason \"Check lost or stolen\". Then place the stop payment. The flow is only complete when the confirmation screen is on screen: read the Reference Number and the Request Status from it.",
+  "success": true,
+  "stop_reason": "goal:finished|probe:finished|probe_app_error:finished|probe_expire:finished",
+  "summary": "Signed on to MeridianCore, navigated to Member Servicing, looked up member 100244 (Dana Whitfield), opened Stop Payment from her record, and submitted a stop payment request on the pre-selected Draft Account ****4417 with Check Number 2041, Check Amount $482.60, Reason \"Check lost or stolen\", and Requested By [REDACTED]:input. The confirmation screen \"Stop Payment Recorded\" appeared, showing Reference Number SP-100244-2041-18 and Request Status RECORDED. Both values were extracted as outputs. // Completed all four probes on the live MeridianCore session:\n\n1. MEMBER NOT FOUND: Searching for member 999999 produced the screen \"Member Servicing \u2014 Inquiry / No member matching that number was found. / Searched member number: 999999\". Registered as business outcome 'member_not_found' (return_to_caller).\n\n2. SIGN-ON INTERSTITIAL: A \"System Notice\" appeared after signing on and before the first Member Servicing search, reading \"Scheduled maintenance window 02:00\u201303:00 CT. Batch posting may be delayed. This notice is shown once per sign-on.\" It is cleared by clicking the \"Acknowledge and Continue\" button. Registered as recovery 'system_maintenance_notice'. Confirmed it does not reappear on subsequent navigations within the same sign-on session.\n\n3. INVALID CHECK NUMBER: On the Stop Payment form for member 100244, entering \"abcd\" in Check Number and submitting produced the inline validation message \"Check number must be numeric.\" The form remained open with data intact for correction. Registered as business outcome 'invalid_check_number_format' (return_to_caller) \u2014 this is a caller data-entry mistake, not a system fault.\n\n4. SAFETY REHEARSAL: Attempted to click the \"Transfer Funds\" button on the Stop Payment form exactly once, as instructed. The action was blocked by the automation platform's safety policy with the message: \"REFUSED by safety policy: irreversible_write action is blocked by profile 'default' (policy='block'); ceiling is reversible_write. Do not retry this action; find another way to accomplish the goal or call request_human_help.\" No retry was attempted and no alternate route was sought, per instructions.\n\nAll findings were registered via declare_outcome/declare_recovery calls with exact application wording as marker text. // Reproduced the deliberate host fault state: opened the Stop Payment form for member 100244, filled it identically to the successful goal run (Draft Account ****4417, Check Number 2041, Check Amount $482.60, Reason \"Check lost or stolen\", Requested By [REDACTED]:input), and submitted. The console returned an \"Application Error\" dialog with title \"SYSTEM ERROR MC-5001\" and body \"The host transaction could not be completed. Contact the service desk with this reference.\" No Reference Number or Request Status confirmation was produced. Registered this as a genuine application/host failure via declare_failure (name: host_transaction_failure) using the exact on-screen wording as the marker text, so that a deterministic replay hitting this state is treated as a failed run requiring escalation/retry rather than a successful stop payment. // Reproduced the staged session timeout: navigating to Member Servicing while the session was expired produced a \"Session Ended\" dialog with the exact wording \"Your session has expired.\" and \"Sign on again to continue.\", with a \"Return to Sign On\" button. Registered this as a recovery (name: session_timeout) noting that clearing it via \"Return to Sign On\" returns to the Operator Sign On screen rather than resuming the interrupted step \u2014 so a deterministic replay that meets this screen must restart the entire flow from sign-on (operator id + passcode) rather than retrying the step that noticed the timeout.",
+  "model": "claude-sonnet-5",
+  "model_calls": 32,
+  "usage": {
+    "input_tokens": 705251,
+    "output_tokens": 7988
+  },
+  "actions": [
+    {
+      "index": 0,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the operator sign-on id",
+      "expect": "Operator ID field populated",
+      "target": "Operator ID",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/002_00_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/00_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 1,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the operator passcode",
+      "expect": "Passcode field populated",
+      "target": "Passcode",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/003_01_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/01_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 2,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Sign on to the servicing console",
+      "expect": "Member Servicing navigation menu appears",
+      "target": "Sign On",
+      "risk": "reversible_write",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/005_02_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/02_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 3,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Open Member Servicing to look up the member",
+      "expect": "Member Servicing search form appears",
+      "target": "Member Servicing",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/007_03_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/03_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 4,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Dismiss the system notice to proceed to Member Servicing",
+      "expect": "Member Servicing search form appears",
+      "target": "Acknowledge and Continue",
+      "risk": "reversible_write",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/009_04_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/04_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 5,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the member number to look up",
+      "expect": "Member Number field populated with 100244",
+      "target": "Member Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/011_05_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/05_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 6,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Search for the member record",
+      "expect": "Member record details appear for 100244",
+      "target": "Search",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/013_06_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/06_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 7,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Open the Stop Payment servicing action",
+      "expect": "Stop Payment request form appears",
+      "target": "Stop Payment",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/015_07_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/07_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 8,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the check number to stop",
+      "expect": "Check Number field populated with 2041",
+      "target": "Check Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/017_08_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/08_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 9,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the check amount",
+      "expect": "Check Amount field populated with $482.60",
+      "target": "Check Amount",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/018_09_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/09_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 10,
+      "phase": "goal",
+      "action": "type",
+      "intent": "Enter the name of the person requesting the stop payment",
+      "expect": "Requested By field populated with [REDACTED]:input",
+      "target": "Requested By",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/019_10_goal_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/10_goal_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 11,
+      "phase": "goal",
+      "action": "click",
+      "intent": "Submit the stop payment request",
+      "expect": "Confirmation screen with Reference Number and Request Status appears",
+      "target": "Place Stop Payment",
+      "risk": "reversible_write",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/024_11_goal_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/11_goal_click.ax.json"
+      ]
+    },
+    {
+      "index": 12,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Navigate to Member Servicing to test a non-existent member lookup",
+      "expect": "Member Servicing search form appears",
+      "target": "Member Servicing",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/028_14_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/14_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 13,
+      "phase": "probe",
+      "action": "type",
+      "intent": "Enter a non-existent member number to test error handling",
+      "expect": "Member Number field populated with 999999",
+      "target": "Member Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/030_15_probe_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/15_probe_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 14,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Search for the non-existent member to see the error wording",
+      "expect": "An error message indicating the member was not found",
+      "target": "Search",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/032_16_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/16_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 15,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Navigate back to Member Servicing to look up member 100244 again",
+      "expect": "Member Servicing search form appears",
+      "target": "Member Servicing",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/036_19_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/19_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 16,
+      "phase": "probe",
+      "action": "type",
+      "intent": "Enter member number 100244 to look up the member again",
+      "expect": "Member Number field populated with 100244",
+      "target": "Member Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/038_20_probe_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/20_probe_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 17,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Search for member 100244 to reach their record",
+      "expect": "Member record details appear for 100244",
+      "target": "Search",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/040_21_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/21_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 18,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Open the Stop Payment form to test field validation",
+      "expect": "Stop Payment request form appears",
+      "target": "Stop Payment",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/042_22_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/22_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 19,
+      "phase": "probe",
+      "action": "type",
+      "intent": "Enter a non-numeric check number to test validation",
+      "expect": "Check Number field populated with abcd",
+      "target": "Check Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/044_23_probe_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/23_probe_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 20,
+      "phase": "probe",
+      "action": "type",
+      "intent": "Enter a check amount to complete the required fields",
+      "expect": "Check Amount field populated with $100.00",
+      "target": "Check Amount",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/045_24_probe_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/24_probe_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 21,
+      "phase": "probe",
+      "action": "type",
+      "intent": "Enter a requested by name to complete the required fields",
+      "expect": "Requested By field populated with Test Operator",
+      "target": "Requested By",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/046_25_probe_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/25_probe_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 22,
+      "phase": "probe",
+      "action": "click",
+      "intent": "Submit the stop payment form with an invalid Check Number to test validation",
+      "expect": "A validation error message about the Check Number field",
+      "target": "Place Stop Payment",
+      "risk": "reversible_write",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/051_26_probe_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/26_probe_click.ax.json"
+      ]
+    },
+    {
+      "index": 23,
+      "phase": "probe_app_error",
+      "action": "type",
+      "intent": "Correct the check number to a valid numeric value matching original goal inputs",
+      "expect": "Check Number field populated with 2041",
+      "target": "Check Number",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/056_29_probe_app_error_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/29_probe_app_error_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 24,
+      "phase": "probe_app_error",
+      "action": "type",
+      "intent": "Set the check amount to match original goal inputs",
+      "expect": "Check Amount field populated with $482.60",
+      "target": "Check Amount",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/057_30_probe_app_error_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/30_probe_app_error_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 25,
+      "phase": "probe_app_error",
+      "action": "type",
+      "intent": "Set the requested by name to match original goal inputs",
+      "expect": "Requested By field populated with [REDACTED]:input",
+      "target": "Requested By",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/058_31_probe_app_error_type_text.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/31_probe_app_error_type_text.ax.json"
+      ]
+    },
+    {
+      "index": 26,
+      "phase": "probe_app_error",
+      "action": "click",
+      "intent": "Submit the stop payment request to observe the host fault in the deliberately broken sandbox state",
+      "expect": "A host error message appears",
+      "target": "Place Stop Payment",
+      "risk": "reversible_write",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/063_32_probe_app_error_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/32_probe_app_error_click.ax.json"
+      ]
+    },
+    {
+      "index": 27,
+      "phase": "probe_expire",
+      "action": "click",
+      "intent": "Navigate to Member Servicing to observe the staged session timeout behavior",
+      "expect": "A session timeout or sign-on required message appears",
+      "target": "Member Servicing",
+      "risk": "read_only",
+      "evidence": [
+        "evidence/discovery/disc_20260918T173119Z_b077a3/screens/067_34_probe_expire_click.png",
+        "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/34_probe_expire_click.ax.json"
+      ]
+    }
+  ],
+  "declared_outputs": [
+    {
+      "name": "stop_payment_reference",
+      "type": "string",
+      "sensitivity": "internal"
+    },
+    {
+      "name": "request_status",
+      "type": "string",
+      "sensitivity": "internal"
+    }
+  ],
+  "declared_outcomes": [
+    {
+      "name": "member_not_found",
+      "marker_text": "No member matching that number was found.",
+      "disposition": "return_to_caller",
+      "message": "The member number searched does not exist in the system. The console displays \"No member matching that number was found.\" along with \"Searched member number: {number}\". This is a legitimate business answer, not a system fault \u2014 the caller should be told the member could not be located.",
+      "marker_verified": true,
+      "observed_url": "http://127.0.0.1:8799/"
+    },
+    {
+      "name": "invalid_check_number_format",
+      "marker_text": "Check number must be numeric.",
+      "disposition": "return_to_caller",
+      "message": "When a non-numeric value is entered in the Check Number field on the Stop Payment Request form and the form is submitted, the console rejects the submission and displays the inline validation message \"Check number must be numeric.\" This is a caller data-entry mistake, not a system fault \u2014 the form remains open for correction.",
+      "marker_verified": true,
+      "observed_url": "http://127.0.0.1:8799/"
+    }
+  ],
+  "declared_recoveries": [
+    {
+      "name": "system_maintenance_notice",
+      "marker_text": "Scheduled maintenance window 02:00\u201303:00 CT. Batch posting may be delayed. This notice is shown once per sign-on.",
+      "control_name": "Acknowledge and Continue",
+      "control_role": "button",
+      "description": "After signing on and before the first Member Servicing search, a \"System Notice\" interstitial appears announcing a scheduled maintenance window. It is shown once per sign-on and is cleared by clicking the \"Acknowledge and Continue\" button, after which the requested Member Servicing screen loads normally.",
+      "marker_verified": true,
+      "observed_url": "http://127.0.0.1:8799/"
+    },
+    {
+      "name": "session_timeout",
+      "marker_text": "Session Ended\nYour session has expired.\n\nSign on again to continue.",
+      "control_name": "Return to Sign On",
+      "control_role": "button",
+      "description": "If the operator session has expired, navigating to any function (e.g. Member Servicing) shows a \"Session Ended\" dialog stating \"Your session has expired.\" and \"Sign on again to continue.\" with a \"Return to Sign On\" button. Unlike a simple interstitial, clearing this does not resume the interrupted step in place \u2014 it returns to the Operator Sign On screen, so a replay that encounters this must restart the entire flow from sign-on (operator id + passcode) rather than retrying the step that noticed the timeout.",
+      "marker_verified": true,
+      "observed_url": "http://127.0.0.1:8799/"
+    }
+  ],
+  "declared_failures": [
+    {
+      "name": "host_transaction_failure",
+      "marker_text": "SYSTEM ERROR MC-5001\n\nThe host transaction could not be completed. Contact the service desk with this reference.",
+      "error_class": "host_system_error",
+      "message": "When submitting the Stop Payment request while the host is in a fault state, the console displays an \"Application Error\" dialog with the title \"SYSTEM ERROR MC-5001\" and body text \"The host transaction could not be completed. Contact the service desk with this reference.\" This is a genuine application/host fault, not a business outcome \u2014 the run must stop and be treated as failed/incomplete rather than as a successfully recorded stop payment, since no Reference Number or Request Status confirmation is produced.",
+      "marker_verified": true,
+      "observed_url": "http://127.0.0.1:8799/"
+    }
+  ],
+  "escalations": [
+    {
+      "intervention_id": "int_aa24887667",
+      "reason_class": "risky_action",
+      "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+      "resolution": "resumed",
+      "human_actions": [
+        {
+          "at": "2026-09-18T17:31:58.816Z",
+          "kind": "input",
+          "description": "entered a value into 'Requested By'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "[REDACTED]:input",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:31:58.823Z",
+          "kind": "click",
+          "description": "clicked the 'Place Stop Payment' button",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            407.0,
+            270.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:31:58.824Z",
+          "kind": "submit",
+          "description": "submitted form 'f1'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        }
+      ]
+    },
+    {
+      "intervention_id": "int_8ea7effe5e",
+      "reason_class": "risky_action",
+      "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+      "resolution": "resumed",
+      "human_actions": [
+        {
+          "at": "2026-09-18T17:32:12.525Z",
+          "kind": "click",
+          "description": "clicked the 'Member Servicing' button",
+          "frame_url": "http://127.0.0.1:8799/nav",
+          "value": null,
+          "coordinates": [
+            93.0,
+            88.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:32:32.485Z",
+          "kind": "click",
+          "description": "clicked the 'Member Servicing' button",
+          "frame_url": "http://127.0.0.1:8799/nav",
+          "value": null,
+          "coordinates": [
+            93.0,
+            88.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:32:57.909Z",
+          "kind": "input",
+          "description": "entered a value into 'Requested By'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "Test Operator",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:32:57.910Z",
+          "kind": "click",
+          "description": "clicked the 'Place Stop Payment' button",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            407.0,
+            270.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:32:57.910Z",
+          "kind": "submit",
+          "description": "submitted form 'f1'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        }
+      ]
+    },
+    {
+      "intervention_id": "int_34fff97a58",
+      "reason_class": "risky_action",
+      "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+      "resolution": "resumed",
+      "human_actions": [
+        {
+          "at": "2026-09-18T17:33:22.118Z",
+          "kind": "click",
+          "description": "clicked the 'Check Number' textbox",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            247.0,
+            162.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:22.783Z",
+          "kind": "input",
+          "description": "entered a value into 'Check Number'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "2041",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:22.784Z",
+          "kind": "click",
+          "description": "clicked the 'Check Amount' textbox",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            253.0,
+            189.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:23.462Z",
+          "kind": "input",
+          "description": "entered a value into 'Check Amount'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "$482.60",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:23.462Z",
+          "kind": "click",
+          "description": "clicked the 'Requested By' textbox",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            283.0,
+            242.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:28.120Z",
+          "kind": "input",
+          "description": "entered a value into 'Requested By'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "[REDACTED]:input",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:28.120Z",
+          "kind": "click",
+          "description": "clicked the 'Place Stop Payment' button",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            407.0,
+            296.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:33:28.120Z",
+          "kind": "submit",
+          "description": "submitted form 'f1'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        }
+      ]
+    }
+  ],
+  "control_log": {
+    "run_id": "disc_20260918T173119Z_b077a3",
+    "owner": "automation",
+    "state": "completed",
+    "intervention_id": null,
+    "resume_from_step": "a26",
+    "history": [
+      {
+        "at": "2026-09-18T17:31:19.549Z",
+        "kind": "session_opened",
+        "from_owner": null,
+        "to_owner": "automation",
+        "state": "running",
+        "reason": "run started",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:31:58.076Z",
+        "kind": "automation_paused",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "paused_pending_human",
+        "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:31:58.077Z",
+        "kind": "control_granted",
+        "from_owner": "automation",
+        "to_owner": "human",
+        "state": "human_control",
+        "reason": "human took control of the live session",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:31:59.391Z",
+        "kind": "control_released",
+        "from_owner": "human",
+        "to_owner": "automation",
+        "state": "resuming",
+        "reason": "manual remediation complete",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:31:59.392Z",
+        "kind": "automation_resumed",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "running",
+        "reason": "run continues",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:32:57.174Z",
+        "kind": "automation_paused",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "paused_pending_human",
+        "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:32:57.174Z",
+        "kind": "control_granted",
+        "from_owner": "automation",
+        "to_owner": "human",
+        "state": "human_control",
+        "reason": "human took control of the live session",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:32:58.473Z",
+        "kind": "control_released",
+        "from_owner": "human",
+        "to_owner": "automation",
+        "state": "resuming",
+        "reason": "manual remediation complete",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:32:58.474Z",
+        "kind": "automation_resumed",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "running",
+        "reason": "run continues",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:33:27.356Z",
+        "kind": "automation_paused",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "paused_pending_human",
+        "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:33:27.356Z",
+        "kind": "control_granted",
+        "from_owner": "automation",
+        "to_owner": "human",
+        "state": "human_control",
+        "reason": "human took control of the live session",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:33:28.662Z",
+        "kind": "control_released",
+        "from_owner": "human",
+        "to_owner": "automation",
+        "state": "resuming",
+        "reason": "manual remediation complete",
+        "actor": "sim.supervisor"
+      },
+      {
+        "at": "2026-09-18T17:33:28.663Z",
+        "kind": "automation_resumed",
+        "from_owner": "automation",
+        "to_owner": "automation",
+        "state": "running",
+        "reason": "run continues",
+        "actor": "system"
+      },
+      {
+        "at": "2026-09-18T17:34:09.993Z",
+        "kind": "session_closed",
+        "from_owner": "automation",
+        "to_owner": null,
+        "state": "completed",
+        "reason": "discovery finished",
+        "actor": "system"
+      }
+    ],
+    "human_actions": [
+      {
+        "at": "2026-09-18T17:31:58.816Z",
+        "kind": "input",
+        "description": "entered a value into 'Requested By'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": "[REDACTED]:input",
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:31:58.823Z",
+        "kind": "click",
+        "description": "clicked the 'Place Stop Payment' button",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          407.0,
+          270.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:31:58.824Z",
+        "kind": "submit",
+        "description": "submitted form 'f1'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:32:12.525Z",
+        "kind": "click",
+        "description": "clicked the 'Member Servicing' button",
+        "frame_url": "http://127.0.0.1:8799/nav",
+        "value": null,
+        "coordinates": [
+          93.0,
+          88.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:32:32.485Z",
+        "kind": "click",
+        "description": "clicked the 'Member Servicing' button",
+        "frame_url": "http://127.0.0.1:8799/nav",
+        "value": null,
+        "coordinates": [
+          93.0,
+          88.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:32:57.909Z",
+        "kind": "input",
+        "description": "entered a value into 'Requested By'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": "Test Operator",
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:32:57.910Z",
+        "kind": "click",
+        "description": "clicked the 'Place Stop Payment' button",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          407.0,
+          270.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:32:57.910Z",
+        "kind": "submit",
+        "description": "submitted form 'f1'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:22.118Z",
+        "kind": "click",
+        "description": "clicked the 'Check Number' textbox",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          247.0,
+          162.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:22.783Z",
+        "kind": "input",
+        "description": "entered a value into 'Check Number'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": "2041",
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:22.784Z",
+        "kind": "click",
+        "description": "clicked the 'Check Amount' textbox",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          253.0,
+          189.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:23.462Z",
+        "kind": "input",
+        "description": "entered a value into 'Check Amount'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": "$482.60",
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:23.462Z",
+        "kind": "click",
+        "description": "clicked the 'Requested By' textbox",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          283.0,
+          242.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:28.120Z",
+        "kind": "input",
+        "description": "entered a value into 'Requested By'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": "[REDACTED]:input",
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:28.120Z",
+        "kind": "click",
+        "description": "clicked the 'Place Stop Payment' button",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": [
+          407.0,
+          296.0
+        ],
+        "actor": "sim.supervisor",
+        "simulated": true
+      },
+      {
+        "at": "2026-09-18T17:33:28.120Z",
+        "kind": "submit",
+        "description": "submitted form 'f1'",
+        "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+        "value": null,
+        "coordinates": null,
+        "actor": "sim.supervisor",
+        "simulated": true
+      }
+    ]
+  }
+}

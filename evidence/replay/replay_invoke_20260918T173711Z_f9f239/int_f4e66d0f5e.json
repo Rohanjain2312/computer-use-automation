@@ -1,0 +1,28 @@
+{
+  "id": "int_f4e66d0f5e",
+  "created_at": "2026-09-18T17:37:24Z",
+  "run_id": "replay_invoke_20260918T173711Z_f9f239",
+  "phase": "replay",
+  "capability_id": "member_stop_payment_request",
+  "capability_version": "1.0.0",
+  "goal": "Record a stop payment against a member's share draft in the MeridianCore servicing console and return the host reference number from the confirmation screen. The committing control is human-only under the default safety profile, so an unattended replay pauses for an operator before the request is recorded.",
+  "step_id": "s11_submit_stop_payment_request",
+  "step_index": 11,
+  "step_intent": "Submit the stop payment request",
+  "reason_class": "risky_action",
+  "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+  "observed_url": "http://127.0.0.1:8799/",
+  "observed_title": "MeridianCore Servicing Console",
+  "observed_excerpt": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Stop Payment Request\nRequest Detail\n\nMember Number 100731\nMember Name Marcus Ellery\nDraft Account \n****1180 \u2014 Share Draft (Checking)\n\nCheck Number \nCheck Amount \nReason \nCheck lost or stolen\nDispute with payee\nDuplicate payment\n\nRequested By \n\u00a0\u00a0\nA stop payment is effective for six months from the date recorded.",
+  "screenshot_path": "evidence/replay/replay_invoke_20260918T173711Z_f9f239/screens/012_intervention_s11_submit_stop_payment_request.png",
+  "dom_snapshot_path": "evidence/replay/replay_invoke_20260918T173711Z_f9f239/snapshots/intervention_s11_submit_stop_payment_request.dom.html",
+  "suggested_actions": [
+    "Perform 'Submit the stop payment request' manually in the browser window",
+    "Then press Release & resume so automation continues from this step"
+  ],
+  "resume_hint": "automation will retry step 's11_submit_stop_payment_request' (Submit the stop payment request) after release",
+  "status": "open",
+  "resolution": "",
+  "resolved_at": null,
+  "operator": null
+}

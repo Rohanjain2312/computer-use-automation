@@ -1,0 +1,1443 @@
+{
+  "schema_version": "1.0",
+  "capability_id": "member_stop_payment_request",
+  "version": "1.0.0",
+  "name": "Member stop payment request",
+  "description": "Record a stop payment against a member's share draft in the MeridianCore servicing console and return the host reference number from the confirmation screen. The committing control is human-only under the default safety profile, so an unattended replay pauses for an operator before the request is recorded.",
+  "status": "draft",
+  "surface": {
+    "kind": "web",
+    "entry_point": "{{ config.base_url }}/",
+    "app_profile": {
+      "vendor": "Meridian Systems",
+      "product": "MeridianCore Servicing",
+      "version_observed": "7.2.1"
+    },
+    "tenant": {
+      "tenant_id": "riverbend_cu",
+      "variant": "base",
+      "base_url_config_key": "base_url"
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "required_strategies": [
+      "dom_hint",
+      "label_proximity",
+      "role_name",
+      "text_anchor",
+      "viewport_ratio"
+    ]
+  },
+  "safety": {
+    "allowlist_profile": "default",
+    "max_autonomous_risk": "reversible_write",
+    "steps_requiring_approval": [
+      "s11_submit_stop_payment_request"
+    ]
+  },
+  "inputs": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "required": true,
+      "description": "Servicing operator sign-on id. Supplied by the platform, not the calling agent.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": null,
+      "example": null,
+      "source": "environment",
+      "env_var": "MERIDIAN_OPERATOR_ID"
+    },
+    {
+      "name": "operator_passcode",
+      "type": "string",
+      "required": true,
+      "description": "Servicing operator passcode. Never stored in the artifact, logs or evidence.",
+      "sensitivity": "secret",
+      "enum_values": null,
+      "pattern": null,
+      "example": null,
+      "source": "environment",
+      "env_var": "MERIDIAN_OPERATOR_PASSCODE"
+    },
+    {
+      "name": "member_id",
+      "type": "string",
+      "required": true,
+      "description": "The member number the stop payment is recorded against.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": "[0-9]{6}",
+      "example": "100244",
+      "source": "caller",
+      "env_var": null
+    },
+    {
+      "name": "check_number",
+      "type": "string",
+      "required": true,
+      "description": "The number of the check to stop, as printed on the draft.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": "[0-9]{1,8}",
+      "example": "2041",
+      "source": "caller",
+      "env_var": null
+    },
+    {
+      "name": "check_amount",
+      "type": "string",
+      "required": true,
+      "description": "The amount of the check, in dollars and cents.",
+      "sensitivity": "internal",
+      "enum_values": null,
+      "pattern": "\\$?[0-9]{1,3}(,[0-9]{3})*\\.[0-9]{2}",
+      "example": "$482.60",
+      "source": "caller",
+      "env_var": null
+    },
+    {
+      "name": "requested_by",
+      "type": "string",
+      "required": true,
+      "description": "The name of the person who asked for the stop payment.",
+      "sensitivity": "pii",
+      "enum_values": null,
+      "pattern": null,
+      "example": null,
+      "source": "caller",
+      "env_var": null
+    }
+  ],
+  "outputs": [
+    {
+      "name": "stop_payment_reference",
+      "type": "string",
+      "description": "The Reference Number printed on the Stop Payment confirmation screen",
+      "sensitivity": "internal",
+      "required": true,
+      "extract": {
+        "target": {
+          "description": "the value cell beside the 'Reference Number' label",
+          "strategies": [
+            {
+              "kind": "label_proximity",
+              "params": {
+                "role": "cell",
+                "label": "Reference Number",
+                "match": "ci_exact"
+              },
+              "confidence": 0.93,
+              "rationale": "The visible text 'Reference Number' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "viewport_ratio",
+              "params": {
+                "role": "cell",
+                "x_ratio": 0.6486,
+                "y_ratio": 0.135,
+                "tolerance": 0.04,
+                "viewport_width": 1280,
+                "viewport_height": 900
+              },
+              "confidence": 0.25,
+              "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "dom_hint",
+              "params": {
+                "css": "td"
+              },
+              "confidence": 0.175,
+              "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 18 other control(s) on this screen)."
+            }
+          ],
+          "frame": "bodypane",
+          "require_unique": true
+        },
+        "attribute": "text",
+        "transforms": [
+          "strip",
+          "collapse_ws"
+        ]
+      }
+    },
+    {
+      "name": "request_status",
+      "type": "string",
+      "description": "The Request Status shown on the Stop Payment confirmation screen",
+      "sensitivity": "internal",
+      "required": true,
+      "extract": {
+        "target": {
+          "description": "the value cell beside the 'Request Status' label",
+          "strategies": [
+            {
+              "kind": "label_proximity",
+              "params": {
+                "role": "cell",
+                "label": "Request Status",
+                "match": "ci_exact"
+              },
+              "confidence": 0.93,
+              "rationale": "The visible text 'Request Status' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "viewport_ratio",
+              "params": {
+                "role": "cell",
+                "x_ratio": 0.6486,
+                "y_ratio": 0.1639,
+                "tolerance": 0.04,
+                "viewport_width": 1280,
+                "viewport_height": 900
+              },
+              "confidence": 0.25,
+              "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+            },
+            {
+              "kind": "dom_hint",
+              "params": {
+                "css": "td"
+              },
+              "confidence": 0.175,
+              "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 18 other control(s) on this screen)."
+            }
+          ],
+          "frame": "bodypane",
+          "require_unique": true
+        },
+        "attribute": "text",
+        "transforms": [
+          "strip",
+          "collapse_ws"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "s00_open",
+      "intent": "Open the servicing console entry point",
+      "action": "navigate",
+      "target": null,
+      "value": null,
+      "url": "{{ config.base_url }}/",
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "element_present",
+          "params": {
+            "strategy": "role_name",
+            "params": {
+              "role": "textbox",
+              "name": "Operator ID"
+            }
+          },
+          "children": [],
+          "description": "the 'Operator ID' control is on screen, so the entry screen finished loading"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "element_present",
+        "params": {
+          "strategy": "role_name",
+          "params": {
+            "role": "textbox",
+            "name": "Operator ID"
+          }
+        },
+        "children": [],
+        "description": "the 'Operator ID' control is on screen, so the entry screen finished loading"
+      },
+      "tags": [
+        "entry"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s01_enter_operator_sign_id",
+      "intent": "Enter the operator sign-on id",
+      "action": "type",
+      "target": {
+        "description": "the 'Operator ID' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Operator ID",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Operator ID' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Operator ID",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Operator ID'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "opid",
+              "css": "input[name=\"opid\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'opid'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.5988,
+              "y_ratio": 0.12,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "operator_id",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s02_enter_operator_passcode",
+      "intent": "Enter the operator passcode",
+      "action": "type",
+      "target": {
+        "description": "the 'Passcode' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Passcode",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Passcode' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Passcode",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Passcode'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "opsecret",
+              "css": "input[name=\"opsecret\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'opsecret'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.5988,
+              "y_ratio": 0.15,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "operator_passcode",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s03_sign_servicing_console",
+      "intent": "Sign on to the servicing console",
+      "action": "click",
+      "target": {
+        "description": "the 'Sign On' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Sign On",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Sign On' via value-attr; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Sign On",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Sign On'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "input"
+            },
+            "confidence": 0.5,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.7107,
+              "y_ratio": 0.18,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "reversible_write",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Select a function from the navigation pane."
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Check number must be numeric."
+              },
+              "children": [],
+              "description": "the screen shows 'Check number must be numeric.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+            }
+          ],
+          "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Select a function from the navigation pane."
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Select a function from the navigation pane.', which was not there before"
+      },
+      "tags": [
+        "signon"
+      ],
+      "optional": false
+    },
+    {
+      "id": "s04_open_member_servicing_look_up_memb",
+      "intent": "Open Member Servicing to look up the member",
+      "action": "click",
+      "target": {
+        "description": "the 'Member Servicing' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Member Servicing",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Member Servicing' via inner-text; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "button",
+              "label": "Dashboard",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Dashboard' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Member Servicing",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Member Servicing'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.0727,
+              "y_ratio": 0.0983,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "div"
+            },
+            "confidence": 0.175,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 4 other control(s) on this screen)."
+          }
+        ],
+        "frame": "navpane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Member Servicing \u2014 Inquiry"
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Check number must be numeric."
+              },
+              "children": [],
+              "description": "the screen shows 'Check number must be numeric.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+            }
+          ],
+          "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Member Servicing \u2014 Inquiry"
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Member Servicing \u2014 Inquiry', which was not there before"
+      },
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s05_enter_member_number_look_up",
+      "intent": "Enter the member number to look up",
+      "action": "type",
+      "target": {
+        "description": "the 'Member Number' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Member Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Member Number' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Member Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Member Number'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "mbrid",
+              "css": "input[name=\"mbrid\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'mbrid'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.3391,
+              "y_ratio": 0.0978,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "member_id",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s06_search_member_record",
+      "intent": "Search for the member record",
+      "action": "click",
+      "target": {
+        "description": "the 'Search' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Search",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Search' via value-attr; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Search",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Search'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "input"
+            },
+            "confidence": 0.3,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 1 other control(s) on this screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.4986,
+              "y_ratio": 0.1578,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Balances are as of the last posted business day."
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Check number must be numeric."
+              },
+              "children": [],
+              "description": "the screen shows 'Check number must be numeric.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+            }
+          ],
+          "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Balances are as of the last posted business day."
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Balances are as of the last posted business day.', which was not there before"
+      },
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s07_open_stop_payment_servicing_action",
+      "intent": "Open the Stop Payment servicing action",
+      "action": "click",
+      "target": {
+        "description": "the 'Stop Payment' cell of the 'Stop Payment' row",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Stop Payment",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Stop Payment' via inner-text; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Stop Payment",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Stop Payment'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.2373,
+              "y_ratio": 0.5222,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "td"
+            },
+            "confidence": 0.175,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 14 other control(s) on this screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Member Servicing \u2014 Stop Payment Request"
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Request', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Check number must be numeric."
+              },
+              "children": [],
+              "description": "the screen shows 'Check number must be numeric.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+            }
+          ],
+          "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Request', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Member Servicing \u2014 Stop Payment Request"
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Request', which was not there before"
+      },
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s08_enter_check_number_stop",
+      "intent": "Enter the check number to stop",
+      "action": "type",
+      "target": {
+        "description": "the 'Check Number' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Check Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Check Number' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Check Number",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Check Number'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "cknum",
+              "css": "input[name=\"cknum\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'cknum'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.3391,
+              "y_ratio": 0.18,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "check_number",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s09_enter_check_amount",
+      "intent": "Enter the check amount",
+      "action": "type",
+      "target": {
+        "description": "the 'Check Amount' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Check Amount",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Check Amount' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Check Amount",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Check Amount'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "amount",
+              "css": "input[name=\"amount\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'amount'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.3438,
+              "y_ratio": 0.21,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "check_amount",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s10_enter_name_person_requesting_stop",
+      "intent": "Enter the name of the person requesting the stop payment",
+      "action": "type",
+      "target": {
+        "description": "the 'Requested By' textbox",
+        "strategies": [
+          {
+            "kind": "label_proximity",
+            "params": {
+              "role": "textbox",
+              "label": "Requested By",
+              "match": "ci_exact"
+            },
+            "confidence": 0.87,
+            "rationale": "The visible text 'Requested By' sits immediately beside the control, which is how this legacy screen labels fields; this survives restyling and added columns because it keys on what the operator reads, not on markup structure (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "textbox",
+              "text": "Requested By",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Requested By'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "name_attr": "reqby",
+              "css": "input[name=\"reqby\"]"
+            },
+            "confidence": 0.55,
+            "rationale": "Falls back to the form field name 'reqby'; web-only and tied to markup, so it is kept strictly as a fallback and its use is recorded as degradation (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "textbox",
+              "x_ratio": 0.3672,
+              "y_ratio": 0.2689,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": {
+        "literal": null,
+        "input": "requested_by",
+        "config": null
+      },
+      "url": null,
+      "key": null,
+      "risk": "read_only",
+      "wait": {
+        "until": null,
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": null,
+      "tags": [],
+      "optional": false
+    },
+    {
+      "id": "s11_submit_stop_payment_request",
+      "intent": "Submit the stop payment request",
+      "action": "click",
+      "target": {
+        "description": "the 'Place Stop Payment' button",
+        "strategies": [
+          {
+            "kind": "role_name",
+            "params": {
+              "role": "button",
+              "name": "Place Stop Payment",
+              "match": "ci_exact"
+            },
+            "confidence": 0.94,
+            "rationale": "The control exposes the accessible name 'Place Stop Payment' via value-attr; role plus accessible name is the most portable identifier and has a direct equivalent in desktop accessibility APIs (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "text_anchor",
+            "params": {
+              "role": "button",
+              "text": "Place Stop Payment",
+              "match": "ci_exact"
+            },
+            "confidence": 0.72,
+            "rationale": "Matches the visible text 'Place Stop Payment'; weaker than role+name because copy changes break it, but it needs no markup at all (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "viewport_ratio",
+            "params": {
+              "role": "button",
+              "x_ratio": 0.4647,
+              "y_ratio": 0.3,
+              "tolerance": 0.04,
+              "viewport_width": 1280,
+              "viewport_height": 900
+            },
+            "confidence": 0.25,
+            "rationale": "Last-resort positional fallback recorded from the discovery run; only correct while the layout is unchanged, and its use is reported so the artifact can be re-recorded (uniquely identifies this control on the screen)."
+          },
+          {
+            "kind": "dom_hint",
+            "params": {
+              "css": "input"
+            },
+            "confidence": 0.175,
+            "rationale": "Falls back to a coarse CSS hint; web-only and brittle, kept only so a run can finish (also matches 2 other control(s) on this screen)."
+          }
+        ],
+        "frame": "bodypane",
+        "require_unique": true
+      },
+      "value": null,
+      "url": null,
+      "key": null,
+      "risk": "reversible_write",
+      "wait": {
+        "until": {
+          "kind": "any_of",
+          "params": {},
+          "children": [
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Member Servicing \u2014 Stop Payment Confirmation"
+              },
+              "children": [],
+              "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Confirmation', which was not there before"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "No member matching that number was found."
+              },
+              "children": [],
+              "description": "the screen shows 'No member matching that number was found.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "Check number must be numeric."
+              },
+              "children": [],
+              "description": "the screen shows 'Check number must be numeric.'"
+            },
+            {
+              "kind": "text_present",
+              "params": {
+                "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+              },
+              "children": [],
+              "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+            }
+          ],
+          "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Confirmation', which was not there before, or a recognized business outcome / application error"
+        },
+        "settle_ms": 250,
+        "timeout_ms": 15000,
+        "poll_ms": 250
+      },
+      "checkpoint": {
+        "kind": "text_present",
+        "params": {
+          "text": "Member Servicing \u2014 Stop Payment Confirmation"
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Confirmation', which was not there before"
+      },
+      "tags": [
+        "needs_human"
+      ],
+      "optional": false
+    }
+  ],
+  "business_outcomes": [
+    {
+      "name": "member_not_found",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "No member matching that number was found."
+        },
+        "children": [],
+        "description": "the screen shows 'No member matching that number was found.'"
+      },
+      "disposition": "return_to_caller",
+      "message": "The member number searched does not exist in the system. The console displays \"No member matching that number was found.\" along with \"Searched member number: {number}\". This is a legitimate business answer, not a system fault \u2014 the caller should be told the member could not be located.",
+      "remediation": null,
+      "active_from_step": null
+    },
+    {
+      "name": "invalid_check_number_format",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "Check number must be numeric."
+        },
+        "children": [],
+        "description": "the screen shows 'Check number must be numeric.'"
+      },
+      "disposition": "return_to_caller",
+      "message": "When a non-numeric value is entered in the Check Number field on the Stop Payment Request form and the form is submitted, the console rejects the submission and displays the inline validation message \"Check number must be numeric.\" This is a caller data-entry mistake, not a system fault \u2014 the form remains open for correction.",
+      "remediation": null,
+      "active_from_step": null
+    }
+  ],
+  "recovery_rules": [
+    {
+      "name": "system_maintenance_notice",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "Scheduled maintenance window 02:00\u201303:00 CT. Batch posting may be delayed. This notice is shown once per sign-on."
+        },
+        "children": [],
+        "description": "the screen shows 'Scheduled maintenance window 02:00\u201303:00 CT. Batch posting m'"
+      },
+      "actions": [
+        {
+          "action": "click",
+          "target": {
+            "description": "the 'Acknowledge and Continue' control that clears this screen",
+            "strategies": [
+              {
+                "kind": "role_name",
+                "params": {
+                  "role": "button",
+                  "name": "Acknowledge and Continue"
+                },
+                "confidence": 0.9,
+                "rationale": "the control is identified by its visible label, which is what the operator clicks to clear the screen"
+              },
+              {
+                "kind": "text_anchor",
+                "params": {
+                  "text": "Acknowledge and Continue",
+                  "match": "contains"
+                },
+                "confidence": 0.6,
+                "rationale": "visible-text fallback if the role is reported differently"
+              }
+            ],
+            "frame": null,
+            "require_unique": false
+          },
+          "value": null,
+          "url": null,
+          "tag": null,
+          "wait": {
+            "until": null,
+            "settle_ms": 250,
+            "timeout_ms": 10000,
+            "poll_ms": 250
+          }
+        }
+      ],
+      "then": "retry_step",
+      "resume_from_step": null,
+      "max_attempts": 2,
+      "description": "After signing on and before the first Member Servicing search, a \"System Notice\" interstitial appears announcing a scheduled maintenance window. It is shown once per sign-on and is cleared by clicking the \"Acknowledge and Continue\" button, after which the requested Member Servicing screen loads normally."
+    },
+    {
+      "name": "session_timeout",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "Session Ended Your session has expired. Sign on again to continue."
+        },
+        "children": [],
+        "description": "the screen shows 'Session Ended Your session has expired. Sign on again to con'"
+      },
+      "actions": [],
+      "then": "resume_from_step",
+      "resume_from_step": "s00_open",
+      "max_attempts": 2,
+      "description": "If the operator session has expired, navigating to any function (e.g. Member Servicing) shows a \"Session Ended\" dialog stating \"Your session has expired.\" and \"Sign on again to continue.\" with a \"Return to Sign On\" button. Unlike a simple interstitial, clearing this does not resume the interrupted step in place \u2014 it returns to the Operator Sign On screen, so a replay that encounters this must restart the entire flow from sign-on (operator id + passcode) rather than retrying the step that noticed the timeout. Restarts the flow from the entry point, because dismissing this screen alone leaves the session unauthenticated."
+    }
+  ],
+  "failure_rules": [
+    {
+      "name": "host_transaction_failure",
+      "when": {
+        "kind": "text_present",
+        "params": {
+          "text": "SYSTEM ERROR MC-5001 The host transaction could not be completed. Contact the service desk with this reference."
+        },
+        "children": [],
+        "description": "the screen shows 'SYSTEM ERROR MC-5001 The host transaction could not be compl'"
+      },
+      "error_class": "host_system_error",
+      "message": "When submitting the Stop Payment request while the host is in a fault state, the console displays an \"Application Error\" dialog with the title \"SYSTEM ERROR MC-5001\" and body text \"The host transaction could not be completed. Contact the service desk with this reference.\" This is a genuine application/host fault, not a business outcome \u2014 the run must stop and be treated as failed/incomplete rather than as a successfully recorded stop payment, since no Reference Number or Request Status confirmation is produced."
+    }
+  ],
+  "success_condition": {
+    "kind": "all_of",
+    "params": {},
+    "children": [
+      {
+        "kind": "element_present",
+        "params": {
+          "strategy": "label_proximity",
+          "params": {
+            "role": "cell",
+            "label": "Reference Number",
+            "match": "ci_exact"
+          },
+          "frame": "bodypane"
+        },
+        "children": [],
+        "description": "the source control for output 'stop_payment_reference' is present"
+      },
+      {
+        "kind": "element_present",
+        "params": {
+          "strategy": "label_proximity",
+          "params": {
+            "role": "cell",
+            "label": "Request Status",
+            "match": "ci_exact"
+          },
+          "frame": "bodypane"
+        },
+        "children": [],
+        "description": "the source control for output 'request_status' is present"
+      },
+      {
+        "kind": "text_present",
+        "params": {
+          "text": "Member Servicing \u2014 Stop Payment Confirmation"
+        },
+        "children": [],
+        "description": "after this step the screen shows 'Member Servicing \u2014 Stop Payment Confirmation', which was not there before"
+      }
+    ],
+    "description": "every declared output is readable on the final screen and the last recorded step's checkpoint still holds"
+  },
+  "provenance": {
+    "discovery_run_id": "disc_20260918T173119Z_b077a3",
+    "model": "claude-sonnet-5",
+    "model_calls": 32,
+    "created_at": "2026-09-18T17:34:10Z",
+    "created_by": "cua-discovery",
+    "goal": "Sign on to the MeridianCore servicing console and open Member Servicing. Look up the member whose number is given by the member_id input. From that member's record, open Stop Payment. On the request form, leave the Draft Account at the account already selected, enter the Check Number, the Check Amount and the Requested By name from the inputs of the same names, and choose the reason \"Check lost or stolen\". Then place the stop payment. The flow is only complete when the confirmation screen is on screen: read the Reference Number and the Request Status from it.",
+    "transcript_sha256": "sha256:59e75b784d0f22b16d33cd8a941bd6ba867e91888178bf01df85fc22b814d1eb",
+    "transcript_evidence_path": "evidence/discovery/disc_20260918T173119Z_b077a3/model_trace.jsonl",
+    "notes": "dropped the step that dismissed the interstitial ('Dismiss the system notice to proceed to Member Servicing'); it is covered by a recovery rule, which fires whenever the screen appears"
+  },
+  "verification": {
+    "smoke_replay_run_id": null,
+    "smoke_replay_status": null,
+    "verified_at": null
+  },
+  "checksum": "sha256:2028c[REDACTED]:accountd43521010c3ebb2254f006015db2678161d0f9c7c8ee11299"
+}

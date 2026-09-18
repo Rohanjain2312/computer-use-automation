@@ -1,0 +1,28 @@
+{
+  "id": "int_aa24887667",
+  "created_at": "2026-09-18T17:31:58Z",
+  "run_id": "disc_20260918T173119Z_b077a3",
+  "phase": "discovery",
+  "capability_id": "(discovery)",
+  "capability_version": "-",
+  "goal": "Sign on to the MeridianCore servicing console and open Member Servicing. Look up the member whose number is given by the member_id input. From that member's record, open Stop Payment. On the request form, leave the Draft Account at the account already selected, enter the Check Number, the Check Amount and the Requested By name from the inputs of the same names, and choose the reason \"Check lost or stolen\". Then place the stop payment. The flow is only complete when the confirmation screen is on screen: read the Reference Number and the Request Status from it.",
+  "step_id": "a11",
+  "step_index": 11,
+  "step_intent": "Submit the stop payment request",
+  "reason_class": "risky_action",
+  "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+  "observed_url": "http://127.0.0.1:8799/",
+  "observed_title": "MeridianCore Servicing Console",
+  "observed_excerpt": "MERIDIANCORE\nServicing v7.2.1\nDashboard\nMember Servicing\nCard Services\nBatch Posting\nSign Off\n---\nMember Servicing \u2014 Stop Payment Request\nRequest Detail\n\nMember Number 100244\nMember Name Dana Whitfield\nDraft Account \n****4417 \u2014 Share Draft (Checking)\n\nCheck Number \nCheck Amount \nReason \nCheck lost or stolen\nDispute with payee\nDuplicate payment\n\nRequested By \n\u00a0\u00a0\nA stop payment is effective for six months from the date recorded.",
+  "screenshot_path": "evidence/discovery/disc_20260918T173119Z_b077a3/screens/021_intervention_11.png",
+  "dom_snapshot_path": "evidence/discovery/disc_20260918T173119Z_b077a3/snapshots/intervention_11.dom.html",
+  "suggested_actions": [
+    "Perform 'Submit the stop payment request' manually in the live browser window",
+    "Then release control so discovery can continue"
+  ],
+  "resume_hint": "discovery continues from the next observation after release",
+  "status": "resolved",
+  "resolution": "resumed",
+  "resolved_at": null,
+  "operator": "scripted-operator"
+}

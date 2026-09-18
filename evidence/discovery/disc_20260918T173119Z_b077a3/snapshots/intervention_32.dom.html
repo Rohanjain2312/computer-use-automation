@@ -1,0 +1,26 @@
+<!-- frame url=http://127.0.0.1:8799/ name= -->
+<html><head><title>MeridianCore Servicing Console</title></head><frameset cols="186,*" border="1" frameborder="1"><frame name="navpane" src="/nav" scrolling="no"><frame name="bodypane" src="/content"><noframes><body>This console requires frame support.</body></noframes></frameset></html>
+<!-- frame url=http://127.0.0.1:8799/nav name=navpane -->
+<html><head><title>Nav</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;font-size:12px;background:#dfe3ea;margin:0}
+table.c1{border-collapse:collapse}
+td.x2{padding:3px 6px;border:1px solid #98a2b3}
+td.hd{background:#1f3a5f;color:#fff;font-weight:bold;padding:4px 6px}
+.navitem{padding:6px 8px;cursor:pointer;border-bottom:1px solid #b6bece}
+.navitem:hover{background:#c8d4e8}
+.err{color:#8a1c1c;font-weight:bold}
+input,select{font-family:Tahoma,Arial;font-size:12px}
+</style></head><body><div style="background:#1f3a5f;color:#fff;padding:6px 8px;font-weight:bold">MERIDIANCORE</div><div style="padding:4px 8px;color:#42506b">Servicing v7.2.1</div><div class="navitem" onclick="parent.bodypane.location='/content'">Dashboard</div><div class="navitem" onclick="parent.bodypane.location='/members'">Member Servicing</div><div class="navitem" onclick="parent.bodypane.location='/stub?m=Card+Services'">Card Services</div><div class="navitem" onclick="parent.bodypane.location='/stub?m=Batch+Posting'">Batch Posting</div><div class="navitem" onclick="parent.bodypane.location='/logout'">Sign Off</div></body></html>
+<!-- frame url=http://127.0.0.1:8799/members/100244/stoppay name=bodypane -->
+<html><head><title>Stop Payment Request</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;font-size:12px;background:#dfe3ea;margin:0}
+table.c1{border-collapse:collapse}
+td.x2{padding:3px 6px;border:1px solid #98a2b3}
+td.hd{background:#1f3a5f;color:#fff;font-weight:bold;padding:4px 6px}
+.navitem{padding:6px 8px;cursor:pointer;border-bottom:1px solid #b6bece}
+.navitem:hover{background:#c8d4e8}
+.err{color:#8a1c1c;font-weight:bold}
+input,select{font-family:Tahoma,Arial;font-size:12px}
+</style></head><body><table class="c1" width="100%"><tbody><tr><td class="hd">Member Servicing — Stop Payment Request</td></tr></tbody></table><table class="c1" style="margin:12px;background:#fff;border:1px solid #98a2b3" width="620"><tbody><tr><td colspan="2" style="padding:5px;background:#eef1f6"><b>Request Detail</b></td></tr><tr><td colspan="2"><form name="f1" method="post" action="/members/100244/stoppay"><table class="c1" width="100%"><tbody><tr><td class="x2" width="170">Member Number</td><td class="x2">100244</td></tr><tr><td class="x2">Member Name</td><td class="x2">Dana Whitfield</td></tr><tr><td class="x2">Draft Account</td><td class="x2"><select name="draft"><option value="****4417" selected="">****4417 — Share Draft (Checking)</option></select></td></tr><tr><td class="x2">Check Number</td><td class="x2"><input type="text" name="cknum" size="12" maxlength="8" value="abcd" style=""></td></tr><tr><td class="x2">Check Amount</td><td class="x2"><input type="text" name="amount" size="14" value="$100.00" style=""></td></tr><tr><td class="x2">Reason</td><td class="x2"><select name="reason"><option value="LOST" selected="">Check lost or stolen</option><option value="DISP">Dispute with payee</option><option value="DUPL">Duplicate payment</option></select></td></tr><tr><td class="x2">Requested By</td><td class="x2"><input type="text" name="reqby" size="24" value="Test Operator" style=""></td></tr><tr><td class="x2" colspan="2"><span class="err">Check number must be numeric.</span></td></tr><tr><td class="x2" colspan="2" align="right"><input type="submit" value="Place Stop Payment" style="">&nbsp;<input type="button" value="Transfer Funds" onclick="location='/stub?m=Transfer+Funds'" style="">&nbsp;<input type="button" value="Cancel" onclick="location='/members/100244'" style=""></td></tr></tbody></table></form></td></tr></tbody></table><div style="margin:0 12px"><font size="1" color="#42506b">A stop payment is effective for six months from the date recorded.</font></div></body></html>

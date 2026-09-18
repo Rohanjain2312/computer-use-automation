@@ -1,0 +1,397 @@
+{
+  "run_id": "replay_smoke_20260918T173410Z_496ef5",
+  "capability_id": "member_stop_payment_request",
+  "capability_version": "1.0.0",
+  "status": "success",
+  "started_at": "2026-09-18T17:34:10.799Z",
+  "finished_at": "2026-09-18T17:34:25.468Z",
+  "duration_ms": 14668,
+  "inputs_echo": {
+    "operator_id": "[REDACTED]:input",
+    "operator_passcode": "[REDACTED]",
+    "member_id": "100244",
+    "check_number": "2041",
+    "check_amount": "$482.60",
+    "requested_by": "[REDACTED]:input"
+  },
+  "outputs": {
+    "stop_payment_reference": "SP-100244-2041-18",
+    "request_status": "RECORDED"
+  },
+  "outcome": null,
+  "failure": null,
+  "steps": [
+    {
+      "id": "s00_open",
+      "index": 0,
+      "intent": "Open the servicing console entry point",
+      "action": "navigate",
+      "status": "ok",
+      "duration_ms": 666,
+      "strategy_used": null,
+      "strategy_confidence": null,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "role_name {'role': 'textbox', 'name': 'Operator ID'} matched 1 control(s) (expected >=1)",
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/001_00_s00_open.png"
+      ]
+    },
+    {
+      "id": "s01_enter_operator_sign_id",
+      "index": 1,
+      "intent": "Enter the operator sign-on id",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1153,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/002_01_s01_enter_operator_sign_id.png"
+      ]
+    },
+    {
+      "id": "s02_enter_operator_passcode",
+      "index": 2,
+      "intent": "Enter the operator passcode",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1383,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/003_02_s02_enter_operator_passcode.png"
+      ]
+    },
+    {
+      "id": "s03_sign_servicing_console",
+      "index": 3,
+      "intent": "Sign on to the servicing console",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 997,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Select a function from the navigation pane.' found on screen (expected present)",
+      "risk": "reversible_write",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/004_03_s03_sign_servicing_console.png"
+      ]
+    },
+    {
+      "id": "s04_open_member_servicing_look_up_memb",
+      "index": 4,
+      "intent": "Open Member Servicing to look up the member",
+      "action": "click",
+      "status": "recovered",
+      "duration_ms": 1516,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Member Servicing \u2014 Inquiry' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [
+        "recovered via 'system_maintenance_notice' (attempt 1)"
+      ],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/005_04_s04_open_member_servicing_look_up_memb.png"
+      ]
+    },
+    {
+      "id": "s05_enter_member_number_look_up",
+      "index": 5,
+      "intent": "Enter the member number to look up",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1099,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/006_05_s05_enter_member_number_look_up.png"
+      ]
+    },
+    {
+      "id": "s06_search_member_record",
+      "index": 6,
+      "intent": "Search for the member record",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 1020,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Balances are as of the last posted business day.' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/007_06_s06_search_member_record.png"
+      ]
+    },
+    {
+      "id": "s07_open_stop_payment_servicing_action",
+      "index": 7,
+      "intent": "Open the Stop Payment servicing action",
+      "action": "click",
+      "status": "ok",
+      "duration_ms": 1013,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Member Servicing \u2014 Stop Payment Request' found on screen (expected present)",
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/008_07_s07_open_stop_payment_servicing_action.png"
+      ]
+    },
+    {
+      "id": "s08_enter_check_number_stop",
+      "index": 8,
+      "intent": "Enter the check number to stop",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1101,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/009_08_s08_enter_check_number_stop.png"
+      ]
+    },
+    {
+      "id": "s09_enter_check_amount",
+      "index": 9,
+      "intent": "Enter the check amount",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1166,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/010_09_s09_enter_check_amount.png"
+      ]
+    },
+    {
+      "id": "s10_enter_name_person_requesting_stop",
+      "index": 10,
+      "intent": "Enter the name of the person requesting the stop payment",
+      "action": "type",
+      "status": "ok",
+      "duration_ms": 1197,
+      "strategy_used": "label_proximity",
+      "strategy_confidence": 0.87,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": null,
+      "risk": "read_only",
+      "notes": [],
+      "evidence": [
+        "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/011_10_s10_enter_name_person_requesting_stop.png"
+      ]
+    },
+    {
+      "id": "s11_submit_stop_payment_request",
+      "index": 11,
+      "intent": "Submit the stop payment request",
+      "action": "click",
+      "status": "escalated",
+      "duration_ms": 0,
+      "strategy_used": "role_name",
+      "strategy_confidence": 0.94,
+      "strategy_ambiguous": false,
+      "strategy_degraded": false,
+      "checkpoint": "text 'Member Servicing \u2014 Stop Payment Confirmation' found on screen (expected present)",
+      "risk": "reversible_write",
+      "notes": [
+        "escalated: control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+        "step satisfied by the operator's manual action"
+      ],
+      "evidence": []
+    }
+  ],
+  "recoveries": [
+    {
+      "rule": "system_maintenance_notice",
+      "step_id": "s04_open_member_servicing_look_up_memb",
+      "attempt": 1,
+      "during": "wait",
+      "applied": true,
+      "then": "retry_step",
+      "detail": "After signing on and before the first Member Servicing search, a \"System Notice\" interstitial appears announcing a scheduled maintenance window. It is shown once per sign-on and is cleared by clicking the \"Acknowledge and Continue\" button, after which the requested Member Servicing screen loads normally."
+    }
+  ],
+  "escalations": [
+    {
+      "intervention_id": "int_b80318b92c",
+      "reason_class": "risky_action",
+      "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+      "step_id": "s11_submit_stop_payment_request",
+      "operator": "scripted-operator",
+      "resolution": "resumed",
+      "outcome_name": null,
+      "human_actions": [
+        {
+          "at": "2026-09-18T17:34:24.289Z",
+          "kind": "input",
+          "description": "entered a value into 'Requested By'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": "[REDACTED]:input",
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:34:24.290Z",
+          "kind": "click",
+          "description": "clicked the 'Place Stop Payment' button",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": [
+            407.0,
+            270.0
+          ],
+          "actor": "sim.supervisor",
+          "simulated": true
+        },
+        {
+          "at": "2026-09-18T17:34:24.291Z",
+          "kind": "submit",
+          "description": "submitted form 'f1'",
+          "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+          "value": null,
+          "coordinates": null,
+          "actor": "sim.supervisor",
+          "simulated": true
+        }
+      ],
+      "screenshot": "evidence/replay/replay_smoke_20260918T173410Z_496ef5/screens/012_intervention_s11_submit_stop_payment_request.png",
+      "dom_snapshot": "evidence/replay/replay_smoke_20260918T173410Z_496ef5/snapshots/intervention_s11_submit_stop_payment_request.dom.html"
+    }
+  ],
+  "control_log": [
+    {
+      "at": "2026-09-18T17:34:10.136Z",
+      "kind": "session_opened",
+      "from_owner": null,
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run started",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-18T17:34:23.543Z",
+      "kind": "automation_paused",
+      "from_owner": "automation",
+      "to_owner": "automation",
+      "state": "paused_pending_human",
+      "reason": "control 'Place Stop Payment' is marked human-only by profile 'default'; automation must hand off",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-18T17:34:23.544Z",
+      "kind": "control_granted",
+      "from_owner": "automation",
+      "to_owner": "human",
+      "state": "human_control",
+      "reason": "human took control of the live session",
+      "actor": "sim.supervisor"
+    },
+    {
+      "at": "2026-09-18T17:34:24.862Z",
+      "kind": "control_released",
+      "from_owner": "human",
+      "to_owner": "automation",
+      "state": "resuming",
+      "reason": "manual remediation complete",
+      "actor": "sim.supervisor"
+    },
+    {
+      "at": "2026-09-18T17:34:24.863Z",
+      "kind": "automation_resumed",
+      "from_owner": "automation",
+      "to_owner": "automation",
+      "state": "running",
+      "reason": "run continues",
+      "actor": "system"
+    },
+    {
+      "at": "2026-09-18T17:34:25.468Z",
+      "kind": "session_closed",
+      "from_owner": "automation",
+      "to_owner": null,
+      "state": "completed",
+      "reason": "capability completed successfully",
+      "actor": "system"
+    }
+  ],
+  "human_actions": [
+    {
+      "at": "2026-09-18T17:34:24.289Z",
+      "kind": "input",
+      "description": "entered a value into 'Requested By'",
+      "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+      "value": "[REDACTED]:input",
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-18T17:34:24.290Z",
+      "kind": "click",
+      "description": "clicked the 'Place Stop Payment' button",
+      "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+      "value": null,
+      "coordinates": [
+        407.0,
+        270.0
+      ],
+      "actor": "sim.supervisor",
+      "simulated": true
+    },
+    {
+      "at": "2026-09-18T17:34:24.291Z",
+      "kind": "submit",
+      "description": "submitted form 'f1'",
+      "frame_url": "http://127.0.0.1:8799/members/100244/stoppay",
+      "value": null,
+      "coordinates": null,
+      "actor": "sim.supervisor",
+      "simulated": true
+    }
+  ],
+  "llm_used": false,
+  "evidence_dir": "evidence/replay/replay_smoke_20260918T173410Z_496ef5",
+  "log_path": "evidence/replay/replay_smoke_20260918T173410Z_496ef5/run.jsonl"
+}
