@@ -68,6 +68,27 @@ MEMBERS: dict[str, Member] = {
     ),
 }
 
+#: Reasons the stop-payment form offers, as the legacy console spells them.
+STOP_PAYMENT_REASONS = [
+    ("LOST", "Check lost or stolen"),
+    ("DISP", "Dispute with payee"),
+    ("DUPL", "Duplicate payment"),
+]
+
+
+def stop_payment_reference(member_id: str, check_number: str) -> str:
+    """The reference the confirmation screen prints.
+
+    Derived from the request rather than from a counter or a clock, so the same
+    inputs produce the same reference on every run. A real host would use a
+    sequence; a fixture that did the same would make the confirmation screen
+    unassertable and every replay non-reproducible.
+    """
+    digits = f"{member_id}{check_number}"
+    check = sum(int(d) for d in digits if d.isdigit()) % 97
+    return f"SP-{member_id}-{check_number}-{check:02d}"
+
+
 # The only credential the mock app accepts. It is a fixture, not a secret; the
 # real value used at runtime is read from MOCK_APP_PASSWORD so that the demo
 # still exercises the "credentials come from the environment" path.

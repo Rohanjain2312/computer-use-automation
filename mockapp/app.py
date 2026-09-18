@@ -9,6 +9,7 @@ demonstrated deterministically instead of waiting for a real outage.
 from __future__ import annotations
 
 import os
+import re
 import time
 
 from flask import Flask, Response, redirect, request, session
@@ -18,8 +19,13 @@ from .data import (
     DEFAULT_OPERATOR_PASSWORD,
     DEFAULT_OPERATOR_USER,
     MEMBERS,
+    STOP_PAYMENT_REASONS,
     SUPERVISOR_OVERRIDE_CODE,
+    stop_payment_reference,
 )
+
+#: What the host accepts as dollars and cents, with or without $ and separators.
+_AMOUNT = re.compile(r"^\$?\d{1,3}(,\d{3})*(\.\d{2})?$|^\$?\d+(\.\d{2})?$")
 
 # Fault modes that /admin/inject understands.
 FAULT_NONE = "none"
@@ -150,6 +156,63 @@ def create_app() -> Flask:
         if _state["fault"] == FAULT_SLOW:
             time.sleep(float(os.environ.get("MOCK_APP_SLOW_SECONDS", "9")))
         return _html(pages.accounts_frame(member))
+
+    @app.get("/members/<member_id>/stoppay")
+    def stop_payment_get(member_id: str):
+        guard = expired_check()
+        if guard is not None:
+            return guard
+        member = MEMBERS.get(member_id)
+        if member is None:
+            return _html(pages.not_found(member_id))
+        if member.restricted and member_id not in session.get("overrides", []):
+            return _html(pages.permission_denied(member_id))
+        return _html(pages.stop_payment_form(member))
+
+    @app.post("/members/<member_id>/stoppay")
+    def stop_payment_post(member_id: str):
+        guard = expired_check()
+        if guard is not None:
+            return guard
+        member = MEMBERS.get(member_id)
+        if member is None:
+            return _html(pages.not_found(member_id))
+        if member.restricted and member_id not in session.get("overrides", []):
+            return _html(pages.permission_denied(member_id))
+
+        values = {k: (request.form.get(k) or "").strip()
+                  for k in ("draft", "cknum", "amount", "reason", "reqby")}
+        reasons = dict(STOP_PAYMENT_REASONS)
+
+        # Field validation, in the order the legacy host checks it. Each of these
+        # is a real runtime condition a replay has to tell apart from a fault.
+        if not values["cknum"]:
+            return _html(pages.stop_payment_form(
+                member, "Check number is required.", values))
+        if not values["cknum"].isdigit():
+            return _html(pages.stop_payment_form(
+                member, "Check number must be numeric.", values))
+        if not values["amount"]:
+            return _html(pages.stop_payment_form(
+                member, "Check amount is required.", values))
+        if not _AMOUNT.match(values["amount"]):
+            return _html(pages.stop_payment_form(
+                member, "Check amount must be entered as dollars and cents.", values))
+        if not values["reqby"]:
+            return _html(pages.stop_payment_form(
+                member, "Requested By is required.", values))
+        if values["reason"] not in reasons:
+            return _html(pages.stop_payment_form(
+                member, "Select a reason for the stop payment.", values))
+
+        if _state["fault"] == FAULT_APP_ERROR:
+            return _html(pages.app_error("MC-5001"), status=500)
+
+        reference = stop_payment_reference(member_id, values["cknum"])
+        session["stop_payments"] = sorted(
+            set(session.get("stop_payments", [])) | {reference})
+        return _html(pages.stop_payment_confirmation(
+            member, reference, values, reasons[values["reason"]]))
 
     @app.get("/override")
     def override_get():

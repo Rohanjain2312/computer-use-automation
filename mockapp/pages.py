@@ -16,7 +16,7 @@ it exists to prove that perception works from what a human can see.
 
 from __future__ import annotations
 
-from .data import Member
+from .data import STOP_PAYMENT_REASONS, Member
 
 _HEAD = """<html><head><title>{title}</title>
 <style>
@@ -219,7 +219,31 @@ def member_detail(member: Member) -> str:
         '<div style="margin:12px"><b>Account Detail</b></div>'
         f'<iframe name="acctframe" src="/members/{member.member_id}/accounts" '
         'width="660" height="230" frameborder="1" style="margin:0 12px"></iframe>'
+        + _servicing_actions(member.member_id)
         + _FOOT
+    )
+
+
+def _servicing_actions(member_id: str) -> str:
+    """The servicing action bar on the member record.
+
+    Three of these move money or close a record. They are here precisely so the
+    allowlist and the risk classifier have something real to refuse: the
+    automation walks past them on its way to the stop-payment form, and the
+    policy gate — not the recording — is what keeps it from touching them.
+    """
+    cells = "".join(
+        f'<td class="x2" style="cursor:pointer;background:#eef1f6" '
+        f"onclick=\"location='{href}'\"><font size=\"2\">{label}</font></td>"
+        for label, href in [
+            ("Stop Payment", f"/members/{member_id}/stoppay"),
+            ("Transfer Funds", f"/stub?m=Transfer+Funds"),
+            ("Close Account", f"/stub?m=Close+Account"),
+        ]
+    )
+    return (
+        '<div style="margin:12px"><b>Servicing Actions</b></div>'
+        '<table class="c1" style="margin:0 12px" width="640"><tr>' + cells + "</tr></table>"
     )
 
 
@@ -243,6 +267,100 @@ def accounts_frame(member: Member) -> str:
         + "</table>"
         + '<div style="padding:6px"><font size="1" color="#42506b">'
         "Balances are as of the last posted business day.</font></div>" + _FOOT
+    )
+
+
+def stop_payment_form(
+    member: Member, error: str = "", values: dict[str, str] | None = None
+) -> str:
+    """The multi-field request form. Same hostile shape as the rest of the console.
+
+    Labels are the table cell to the left, the draft list is a plain ``<select>``
+    of the member's share-draft accounts, and the commit control sits next to a
+    money-moving one so that telling them apart is the policy gate's job.
+    """
+    v = values or {}
+    drafts = [a for a in member.accounts if "Draft" in a.account_type] or member.accounts
+    options = "".join(
+        f'<option value="{a.account_number}"'
+        f'{" selected" if v.get("draft") == a.account_number else ""}>'
+        f"{a.account_number} &#8212; {a.account_type}</option>"
+        for a in drafts
+    )
+    reasons = "".join(
+        f'<option value="{code}"{" selected" if v.get("reason") == code else ""}>{label}</option>'
+        for code, label in STOP_PAYMENT_REASONS
+    )
+    err = (
+        f'<tr><td class="x2" colspan="2"><span class="err">{error}</span></td></tr>'
+        if error
+        else ""
+    )
+    return (
+        _HEAD.format(title="Stop Payment Request")
+        + '<table class="c1" width="100%"><tr><td class="hd">'
+        "Member Servicing &#8212; Stop Payment Request</td></tr></table>"
+        '<table class="c1" style="margin:12px;background:#fff;border:1px solid #98a2b3" width="620">'
+        '<tr><td colspan="2" style="padding:5px;background:#eef1f6"><b>Request Detail</b></td></tr>'
+        '<tr><td colspan="2"><form name="f1" method="post" '
+        f'action="/members/{member.member_id}/stoppay">'
+        '<table class="c1" width="100%">'
+        f'<tr><td class="x2" width="170">Member Number</td>'
+        f'<td class="x2">{member.member_id}</td></tr>'
+        f'<tr><td class="x2">Member Name</td><td class="x2">{member.name}</td></tr>'
+        f'<tr><td class="x2">Draft Account</td>'
+        f'<td class="x2"><select name="draft">{options}</select></td></tr>'
+        f'<tr><td class="x2">Check Number</td><td class="x2">'
+        f'<input type="text" name="cknum" size="12" maxlength="8" '
+        f'value="{v.get("cknum", "")}"></td></tr>'
+        f'<tr><td class="x2">Check Amount</td><td class="x2">'
+        f'<input type="text" name="amount" size="14" value="{v.get("amount", "")}"></td></tr>'
+        f'<tr><td class="x2">Reason</td>'
+        f'<td class="x2"><select name="reason">{reasons}</select></td></tr>'
+        f'<tr><td class="x2">Requested By</td><td class="x2">'
+        f'<input type="text" name="reqby" size="24" value="{v.get("reqby", "")}"></td></tr>'
+        f"{err}"
+        '<tr><td class="x2" colspan="2" align="right">'
+        '<input type="submit" value="Place Stop Payment">'
+        "&nbsp;<input type=\"button\" value=\"Transfer Funds\" "
+        "onclick=\"location='/stub?m=Transfer+Funds'\">"
+        "&nbsp;<input type=\"button\" value=\"Cancel\" "
+        f"onclick=\"location='/members/{member.member_id}'\"></td></tr>"
+        "</table></form></td></tr></table>"
+        '<div style="margin:0 12px"><font size="1" color="#42506b">'
+        "A stop payment is effective for six months from the date recorded."
+        "</font></div>" + _FOOT
+    )
+
+
+def stop_payment_confirmation(
+    member: Member, reference: str, values: dict[str, str], reason_label: str
+) -> str:
+    """The checkpoint screen: the flow is only complete when this is on screen."""
+    return (
+        _HEAD.format(title="Stop Payment Confirmation")
+        + '<table class="c1" width="100%"><tr><td class="hd">'
+        "Member Servicing &#8212; Stop Payment Confirmation</td></tr></table>"
+        '<center><table class="c1" width="560" '
+        'style="margin-top:24px;background:#fff;border:2px solid #1f6f3a">'
+        '<tr><td class="hd" colspan="2" style="background:#1f6f3a">'
+        "Stop Payment Recorded</td></tr>"
+        '<tr><td colspan="2" style="padding:8px"><font size="1" color="#42506b">'
+        "The request has been accepted by the host. Give the reference below to the member."
+        "</font></td></tr>"
+        f'<tr><td class="x2" width="180">Reference Number</td>'
+        f'<td class="x2"><b>{reference}</b></td></tr>'
+        f'<tr><td class="x2">Request Status</td><td class="x2">RECORDED</td></tr>'
+        f'<tr><td class="x2">Member Number</td><td class="x2">{member.member_id}</td></tr>'
+        f'<tr><td class="x2">Draft Account</td><td class="x2">{values.get("draft", "")}</td></tr>'
+        f'<tr><td class="x2">Check Number</td><td class="x2">{values.get("cknum", "")}</td></tr>'
+        f'<tr><td class="x2">Check Amount</td><td class="x2">{values.get("amount", "")}</td></tr>'
+        f'<tr><td class="x2">Reason</td><td class="x2">{reason_label}</td></tr>'
+        f'<tr><td class="x2">Requested By</td><td class="x2">{values.get("reqby", "")}</td></tr>'
+        '<tr><td align="right" style="padding:8px" colspan="2">'
+        "<input type=\"button\" value=\"Return to Member\" "
+        f"onclick=\"location='/members/{member.member_id}'\"></td></tr>"
+        "</table></center>" + _FOOT
     )
 
 

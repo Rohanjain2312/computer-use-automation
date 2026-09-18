@@ -7,7 +7,7 @@
 version: 1
 
 profiles:
-  default:
+  default: &default
     description: >-
       Local MeridianCore mock servicing console. Inquiry-only: the agent may
       read member and account data and may sign on, but may not perform any
@@ -27,6 +27,7 @@ profiles:
       - "^/members/search$"
       - "^/members/[0-9]{1,9}$"
       - "^/members/[0-9]{1,9}/accounts$"
+      - "^/members/[0-9]{1,9}/stoppay$"
       - "^/notice/ack$"
       - "^/override$"
       - "^/stub$"
@@ -82,13 +83,61 @@ profiles:
       - supervisor override
       - save
       - update
+      - place stop payment
 
     # Steps whose live control name matches these always need a person, even
     # though their risk level alone would permit automation.
+    #
+    # "place stop payment" is the commit control of the stop-payment capability.
+    # It is deliberately narrower than "stop payment": opening the request form
+    # changes nothing and stays automated, while the click that records the
+    # request against a member's account is a person's decision.
     human_only_control_markers:
       - supervisor override
       - apply override
+      - place stop payment
 
     # Stopping conditions for the discovery loop.
+    #
+    # The budget covers a whole run, and a recording that rehearses several
+    # mutually exclusive fault conditions needs one probe phase per condition —
+    # so it is sized for the longest capability here, not the shortest. Replay
+    # uses the same ceiling as a backstop; a replay that takes minutes is
+    # already broken, and the per-step waits are what actually bound it.
     max_discovery_steps: 32
-    max_run_seconds: 420
+    max_run_seconds: 900
+
+  # A second institution running the same vendor product.
+  #
+  # Same routes, same actions, same ceiling — the only difference is how this
+  # institution classifies recording a stop payment. Here it counts as
+  # irreversible, so automation is refused outright instead of being allowed to
+  # hand off to an operator. The point is that the *capability* does not change:
+  # `member_stop_payment_request` replays under either profile, does every
+  # harmless step, and then either escalates or stops with `blocked_by_policy`
+  # having recorded nothing. Policy is configuration, not a property of the
+  # recording.
+  no_unattended_writes:
+    <<: *default
+    description: >-
+      Second-tenant profile for the same MeridianCore product. Treats a stop
+      payment as irreversible, so the commit is blocked rather than escalated.
+
+    # Nothing is human-only here, because nothing risky is permitted at all.
+    human_only_control_markers: []
+
+    irreversible_control_markers:
+      - place stop payment
+      - transfer
+      - wire
+      - disburse
+      - post transaction
+      - apply payment
+      - charge off
+      - close account
+      - delete
+      - remove
+      - void
+      - reverse
+      - issue card
+      - waive

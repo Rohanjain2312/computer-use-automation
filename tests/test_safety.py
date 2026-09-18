@@ -104,6 +104,32 @@ def test_human_only_control_routes_to_a_person_rather_than_failing(gate):
     assert decision.violated == "human_only"
 
 
+def test_commit_control_is_human_only_even_though_it_is_only_reversible(gate):
+    """The stop-payment commit is under the risk ceiling and still needs a person."""
+    decision = gate.check(action=ActionKind.click, control_label="Place Stop Payment")
+    assert decision.risk is RiskLevel.reversible_write
+    assert not decision.allowed and decision.requires_human
+    assert decision.violated == "human_only"
+
+
+def test_opening_the_request_form_stays_automated(gate):
+    """The human-only marker is the commit, not the whole flow."""
+    decision = gate.check(action=ActionKind.click, control_label="Stop Payment")
+    assert decision.allowed and not decision.requires_human
+
+
+def test_money_moving_control_beside_the_commit_is_blocked_not_escalated(gate):
+    """'Transfer Funds' sits on the stop-payment screen. Blocking beats asking."""
+    decision = gate.check(action=ActionKind.click, control_label="Transfer Funds")
+    assert not decision.allowed and not decision.requires_human
+    assert decision.violated == "risk_ceiling"
+
+
+def test_stop_payment_route_is_on_the_allowlist(gate):
+    ok, _ = gate.profile.url_verdict("http://127.0.0.1:8799/members/100244/stoppay")
+    assert ok
+
+
 def test_action_type_outside_the_profile_is_refused(gate):
     profile = gate.profile
     tight = PolicyGate(type(profile)(**{**profile.__dict__,
